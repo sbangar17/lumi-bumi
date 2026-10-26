@@ -89,9 +89,6 @@ PRESETS = {
     "love": ("heart", "Love you!"),
     "miss": ("star", "Miss you!"),
     "night": ("moon", "Good night!"),
-    "fam1": ("heart", "Hi Mom!"),
-    "fam2": ("heart", "Hi Aunt!"),
-    "fam3": ("smile", "Hi both of you!"),
 }
 
 
@@ -194,14 +191,18 @@ def draw_text():
 
 
 def draw_preset():
-    icon, label = PRESETS[view["id"]]
-    if "\n" in label:                      # two-line label: smaller picture
+    if view["id"] in PRESETS:
+        icon, label = PRESETS[view["id"]]
+        lines = [label]
+    else:                                   # a custom message typed on the phone page
+        icon, lines = view["icon"], wrap(view["label"])[:2]
+    if len(lines) > 1:                      # two-line label: smaller picture
         draw_icon(icon, 52, 0, 3)
-        for n, line in enumerate(label.split("\n")):
+        for n, line in enumerate(lines):
             center(line, 28 + n * 10)
     else:
         draw_icon(icon, 48, 2, 4)
-        center(label, 40)
+        center(lines[0], 40)
     center("from " + view["sender"], 54)
 
 
@@ -457,10 +458,16 @@ def handle_inbox():
                 play(MELODY_TEXT)
             elif kind == "preset":
                 pid = m.get("id")
-                if pid not in PRESETS:
+                icon, label = "heart", ""
+                if pid == "custom":
+                    label = clean(str(m.get("label", "")))[:32].strip()
+                    icon = m.get("icon") if m.get("icon") in ICONS else "heart"
+                    if not label:
+                        continue
+                elif pid not in PRESETS:
                     continue
                 wake()
-                set_view(kind="preset", id=pid, sender=sender)
+                set_view(kind="preset", id=pid, sender=sender, icon=icon, label=label)
                 play(MELODY_PRESET)
             elif kind == "img":
                 data = binascii.a2b_base64(m["data"])
@@ -492,7 +499,7 @@ def send_preset(pid):
         flash("Not sent :(", "no connection")
         play(MELODY_ERR)
         return
-    status("Sent!", *PRESETS[pid][1].split("\n"))        # screen and chime together
+    status("Sent!", PRESETS[pid][1])        # screen and chime together
     play(MELODY_SENT)
     time.sleep_ms(1300)
     redraw()

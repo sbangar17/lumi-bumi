@@ -29,7 +29,7 @@ PIN_BTN_A = 3
 PIN_BTN_B = 4
 
 # --- Quick-send messages: short press / long press (hold ~1 second) ----------
-# Choose from: "hi", "love", "miss", "night", "fam1", "fam2", "fam3"
+# Choose from: "hi", "love", "miss", "night", 
 PRESET_A = "hi"
 PRESET_A_LONG = "miss"
 PRESET_B = "love"

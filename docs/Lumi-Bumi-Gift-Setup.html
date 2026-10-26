@@ -65,7 +65,7 @@
 
 <div class="card">
   <ul class="check">
-    <li><input type="checkbox" id="a1"><label for="a1"><b>Update Bumi's program.</b> Plug Bumi into your Mac and upload the new <code>main.py</code> (it adds Hi Mom!, Hi Aunt! and Hi both of you!). Do Lumi too.</label></li>
+    <li><input type="checkbox" id="a1"><label for="a1"><b>Update Bumi's program.</b> Plug Bumi into your Mac and upload the new <code>main.py</code> (it lets the phone page send your own extra quick messages). Do Lumi too.</label></li>
     <li><input type="checkbox" id="a2"><label for="a2"><b>Remove your Wi-Fi from Bumi.</b> Bumi's <code>config.py</code> still holds your Wi-Fi name and password. Blank both and re-upload, so your password isn't in the gift and the cube opens its setup hotspot at her home.</label></li>
     <li><input type="checkbox" id="a3"><label for="a3"><b>Change the EMQX passwords.</b> In the EMQX console, set new passwords for the Lumi and Bumi users (use long, random ones). Then update <code>config.py</code> and <code>config_bumi.py</code> and re-upload, one cube at a time. Lumi won't connect until its new password is on it.</label></li>
     <li><input type="checkbox" id="a4"><label for="a4"><b>Test the hotspot.</b> Hold <b>both buttons</b> while plugging Bumi in. A Wi-Fi called <code>LumiBumi-Setup</code> should appear. Join it from a phone and open <code>192.168.4.1</code>. If the page loads, it works.</label></li>
@@ -110,6 +110,7 @@
     <li><input type="checkbox" id="c1"><label for="c1"><b>Create a separate EMQX user</b> for the phone page, such as <code>bumiphone</code>, with its own password. Don't share Lumi's or Bumi's logins. You can delete this user later without touching the cubes.</label></li>
     <li><input type="checkbox" id="c2"><label for="c2"><b>Make the page reachable from her phone.</b> The file <code>phone/index.html</code> has to be hosted somewhere on the web (a free static host works), or opened from a copy on her phone.</label></li>
     <li><input type="checkbox" id="c3"><label for="c3"><b>Set it up once:</b> open the page, open Settings, and fill in the broker address, port <code>8084</code>, the phone user, the topic prefix, and a display name. Set <b>"My cube is"</b> to <b>Bumi</b>.</label></li>
+    <li><input type="checkbox" id="c3b"><label for="c3b"><b>Add your extra quick messages</b> in Settings, in the box "Extra quick messages", one per line like <code>lumi | heart | Hi there!</code>. They are saved in the setup link, not on the hosted page, so the page itself holds no names.</label></li>
     <li><input type="checkbox" id="c4"><label for="c4"><b>Share with a link:</b> tap <b>Copy setup link</b> and send it to her family privately. The link carries the login, so don't post it publicly.</label></li>
     <li><input type="checkbox" id="c5"><label for="c5"><b>Test:</b> send a text and a drawing from the phone page, and check they show on Lumi.</label></li>
   </ul>

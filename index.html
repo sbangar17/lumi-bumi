@@ -155,6 +155,9 @@
       <input id="s-prefix" placeholder="lumibumi/your-random-words" autocapitalize="off" autocorrect="off">
       <label for="s-name">Name shown on their cube (up to 11 letters)</label>
       <input id="s-name" maxlength="11" placeholder="Auntie">
+      <label for="s-extras">Extra quick messages (optional, one per line: <code>to | icon | text</code>)</label>
+      <textarea id="s-extras" rows="3" placeholder="lumi | heart | Hi there!&#10;bumi | smile | Hi you two!" autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>
+      <div class="hint">"to" is lumi or bumi. Icon (optional) is smile, heart, star or moon. They show in the Quick tab when you send to that cube. Up to 16 letters per line, 2 lines.</div>
       <div class="row" style="margin-top:12px">
         <button class="btn primary" id="s-save" style="font-size:16px">Save &amp; connect</button>
         <button class="btn" id="s-link">Copy setup link</button>
@@ -185,7 +188,8 @@ function readForm() {
     host: $("s-host").value.trim().replace(/^[a-z]+:\/\//i, "").replace(/\/.*$/, ""),
     port: $("s-port").value.trim() || "8084",
     me: $("s-me").value, user: $("s-user").value.trim(), pass: $("s-pass").value,
-    prefix: $("s-prefix").value.trim().replace(/\/+$/, ""), name: $("s-name").value.trim()
+    prefix: $("s-prefix").value.trim().replace(/\/+$/, ""), name: $("s-name").value.trim(),
+    extras: $("s-extras").value
   };
 }
 function fillForm(s) {
@@ -196,6 +200,7 @@ function fillForm(s) {
   if (s.pass) $("s-pass").value = s.pass;
   if (s.prefix) $("s-prefix").value = s.prefix;
   if (s.name) $("s-name").value = s.name;
+  if (s.extras) $("s-extras").value = s.extras;
   $("target").value = ($("s-me").value === "lumi") ? "bumi" : "lumi"; buildQuick(); updatePreview();
 }
 // A setup link looks like  https://.../index.html#cfg=BASE64
@@ -274,10 +279,7 @@ const ICONS = {
   hi:    { label: "Hi!",         rows: [0x3C,0x42,0xA5,0x81,0xA5,0x99,0x42,0x3C] },
   love:  { label: "Love you!",   rows: [0x66,0xFF,0xFF,0xFF,0x7E,0x3C,0x18,0x00] },
   miss:  { label: "Miss you!",   rows: [0x18,0x18,0xFF,0x7E,0x3C,0x7E,0x66,0x00] },
-  night: { label: "Good night!", rows: [0x38,0x70,0xE0,0xE0,0xE0,0x70,0x38,0x00] },
-  fam1:  { label: "Hi Mom!",    rows: [0x66,0xFF,0xFF,0xFF,0x7E,0x3C,0x18,0x00], only: "lumi" },
-  fam2:  { label: "Hi Aunt!",    rows: [0x66,0xFF,0xFF,0xFF,0x7E,0x3C,0x18,0x00], only: "lumi" },
-  fam3:  { label: "Hi both of you!", rows: [0x3C,0x42,0xA5,0x81,0xA5,0x99,0x42,0x3C], only: "bumi" }
+  night: { label: "Good night!", rows: [0x38,0x70,0xE0,0xE0,0xE0,0x70,0x38,0x00] }
 };
 function iconCanvas(rows, size) {
   const c = document.createElement("canvas"); c.width = c.height = 8;
@@ -286,17 +288,35 @@ function iconCanvas(rows, size) {
   if (size) { c.style.width = c.style.height = size + "px"; }
   return c;
 }
+const ICON_KEY = { smile: "hi", heart: "love", star: "miss", moon: "night" };   // picture name -> ICONS entry
+function parseExtras() {             // "to | icon | text" per line -> [{to, icon, label}]
+  const out = [];
+  for (const line of $("s-extras").value.split("\n")) {
+    const p = line.split("|").map(x => x.trim());
+    if (p.length < 2 || !p[p.length - 1]) continue;
+    const to = p[0].toLowerCase(), label = cleanText(p[p.length - 1]).slice(0, 32);
+    const icon = p.length > 2 && ICON_KEY[p[1].toLowerCase()] ? p[1].toLowerCase() : "heart";
+    if ((to === "lumi" || to === "bumi") && label) out.push({ to, icon, label });
+  }
+  return out;
+}
+function quickItems() {              // built-in pictures plus this cube's extras
+  const to = $("target").value, items = [];
+  for (const [id, ic] of Object.entries(ICONS)) items.push({ id, label: ic.label, rows: ic.rows });
+  parseExtras().forEach((x, n) => { if (x.to === to) items.push({ id: "x" + n, label: x.label, rows: ICONS[ICON_KEY[x.icon]].rows, extra: x }); });
+  return items;
+}
+function quickItem() { return quickItems().find(x => x.id === quickPick) || quickItems()[0]; }
 function buildQuick() {
-  const grid = $("quickgrid"), to = $("target").value;
+  const grid = $("quickgrid"), items = quickItems();
   grid.innerHTML = "";
-  if (ICONS[quickPick].only && ICONS[quickPick].only !== to) quickPick = "hi";   // extras belong to one cube
-  for (const [id, ic] of Object.entries(ICONS)) {
-    if (ic.only && ic.only !== to) continue;
+  if (!items.some(x => x.id === quickPick)) quickPick = "hi";
+  for (const it of items) {
     const b = document.createElement("button");
-    b.className = "btn" + (id === quickPick ? " sel" : ""); b.dataset.id = id;
-    b.appendChild(iconCanvas(ic.rows)); b.append(ic.label);
+    b.className = "btn" + (it.id === quickPick ? " sel" : ""); b.dataset.id = it.id;
+    b.appendChild(iconCanvas(it.rows)); b.append(it.label);
     b.onclick = () => {
-      quickPick = id;
+      quickPick = it.id;
       grid.querySelectorAll("button").forEach(x => x.classList.toggle("sel", x === b));
       updatePreview();
     };
@@ -323,7 +343,7 @@ function updatePreview() {
   } else if (mode === "quick") {
     setPreviewKind("canvas");
     px.fill(0);
-    const rows = ICONS[quickPick].rows, ox = 48, oy = 2, s = 4;
+    const rows = quickItem().rows, ox = 48, oy = 2, s = 4;
     rows.forEach((row, r) => { for (let x = 0; x < 8; x++) if (row & (0x80 >> x))
       for (let dy = 0; dy < s; dy++) for (let dx = 0; dx < s; dx++) px[(oy + r * s + dy) * W + ox + x * s + dx] = 1; });
     redraw();
@@ -477,7 +497,7 @@ function addLog(who, content) {
 function showIncoming(m) {
   const from = m.from || "Someone";
   if (m.type === "text") { addLog(from + " →", m.text || ""); beep(); }
-  else if (m.type === "preset" && ICONS[m.id]) { addLog(from + " →", ICONS[m.id].label); beep(); }
+  else if (m.type === "preset" && (ICONS[m.id] || m.id === "custom")) { addLog(from + " →", m.id === "custom" ? String(m.label || "") : ICONS[m.id].label); beep(); }
   else if (m.type === "img") {
     const tmp = new Uint8Array(W * H); unpack(unb64(m.data), tmp);
     const c = document.createElement("canvas"); c.width = W; c.height = H; paint(c, tmp);
@@ -502,7 +522,9 @@ function send() {
     if (!text) { toast("Type a message first"); return; }
     msg = { type: "text", from, text }; summary = text;
   } else if (mode === "quick") {
-    msg = { type: "preset", from, id: quickPick }; summary = ICONS[quickPick].label;
+    const q = quickItem();
+    msg = q.extra ? { type: "preset", from, id: "custom", icon: q.extra.icon, label: q.extra.label } : { type: "preset", from, id: q.id };
+    summary = q.label;
   } else {
     if (!px.some(v => v)) { toast("The picture is empty"); return; }
     msg = { type: "img", from, data: b64(pack()) };
@@ -537,6 +559,7 @@ $("s-link").onclick = async () => {
 fillForm(loadSettings());
 buildQuick();
 $("target").onchange = () => { buildQuick(); updatePreview(); };
+$("s-extras").oninput = () => { buildQuick(); updatePreview(); };
 updatePreview();
 connect();
 </script>
