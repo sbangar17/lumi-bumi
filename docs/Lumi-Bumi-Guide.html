@@ -1,0 +1,1850 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lumi Bumi — build guide</title><style>
+:root{--bg:#f1f5f9;--ink:#0f172a;--mute:#64748b;--card:#fff;--line:#e2e8f0;--a:#2563eb;--b:#db2777;--ok:#16a34a}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:70px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+header.hero{background:linear-gradient(135deg,#1e3a8a,#be185d);color:#fff;padding:40px 20px 56px;text-align:center}
+.hero h1{margin:0;font-size:clamp(30px,5vw,48px)}.hero p{max-width:640px;margin:10px auto 0;opacity:.92}
+.wrap{max-width:980px;margin:-28px auto 60px;padding:0 16px}
+nav.bar{position:sticky;top:0;z-index:10;background:#ffffffee;backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav.bar .in{max-width:980px;margin:0 auto;padding:8px 16px}
+.prog{height:8px;background:var(--line);border-radius:8px;overflow:hidden}.prog>div{height:100%;width:0;background:linear-gradient(90deg,var(--a),var(--b));transition:.3s}
+.progtxt{font-size:12px;color:var(--mute);margin-top:4px;display:flex;justify-content:space-between}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0}
+.toc a{font-size:12px;text-decoration:none;color:var(--ink);background:#eef2ff;border-radius:999px;padding:3px 10px}
+.toc a b{color:var(--a)}
+.step,.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;margin:18px 0;box-shadow:0 1px 2px #0001}
+.shead{display:flex;gap:14px;align-items:center;margin-bottom:8px}
+.badge{flex:0 0 46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--a),var(--b));color:#fff;font-weight:800;font-size:22px;display:grid;place-items:center}
+h2{margin:0;font-size:22px}h3{margin:22px 0 6px;font-size:17px}h4{margin:0 0 6px}
+.meta{color:var(--mute);font-size:13px}
+figure{margin:14px 0}figure svg{width:100%;height:auto;border:1px solid var(--line);border-radius:14px}
+figcaption{font-size:13px;color:var(--mute);margin-top:6px}
+table{border-collapse:collapse;width:100%;margin:10px 0;font-size:15px}
+th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}th{background:#f8fafc}
+td.ok{color:var(--ok);font-weight:600}td.need{color:#b45309;font-weight:700}
+code{background:#eef2f7;border-radius:5px;padding:1px 5px;font:13.5px ui-monospace,Menlo,Consolas,monospace}
+.code{position:relative;margin:10px 0}.code pre{margin:0;background:#0b1220;color:#e2e8f0;border-radius:12px;padding:16px;overflow:auto;font-size:13px;line-height:1.5}
+.code code{background:none;padding:0;color:inherit;font-size:inherit}
+.ctitle{background:#1e293b;color:#94a3b8;font:600 12px ui-monospace,monospace;padding:6px 12px;border-radius:12px 12px 0 0;margin-bottom:-6px}
+.ctitle+button+pre{border-top-left-radius:0;border-top-right-radius:0}
+.copy{position:absolute;top:6px;right:8px;background:#334155;color:#fff;border:0;border-radius:8px;padding:4px 10px;font-size:12px;cursor:pointer;z-index:1}
+.copy:hover{background:var(--a)}
+.note{display:flex;gap:12px;border-radius:12px;padding:12px 14px;margin:14px 0;font-size:15px}
+.note .ni{font-size:20px}.note.tip{background:#ecfdf5;border:1px solid #a7f3d0}.note.warn{background:#fffbeb;border:1px solid #fde68a}
+.note.info{background:#eff6ff;border:1px solid #bfdbfe}.note.stop{background:#fef2f2;border:1px solid #fecaca}
+.tests{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:12px 16px;margin:18px 0 4px}
+.hint{font-weight:400;font-size:12px;color:var(--mute)}
+.chk{display:flex;gap:10px;align-items:flex-start;padding:5px 0;cursor:pointer}.chk input{margin-top:5px;width:18px;height:18px;flex:0 0 auto}
+.chk input:checked+span{color:var(--mute);text-decoration:line-through}
+ol.steps{padding-left:22px}ol.steps>li{margin:8px 0}
+details.app{border:1px solid var(--line);border-radius:12px;margin:10px 0;padding:6px 12px;background:#fff}details.app summary{cursor:pointer;font-weight:600;padding:6px 0}
+footer{text-align:center;color:var(--mute);font-size:13px;padding:20px}
+@media print{nav.bar,.copy{display:none}.step,.card{break-inside:avoid-page;box-shadow:none}details.app{display:none}}
+</style></head><body>
+<header class="hero"><h1>Lumi ♥ Bumi</h1>
+<p>Two glass cubes that send each other little messages — text, drawings, photos and one-press hellos — built with an ESP32-C3, a tiny OLED, a buzzer and two buttons.</p></header>
+<nav class="bar"><div class="in">
+<div class="prog"><div id="pbar"></div></div>
+<div class="progtxt"><span id="ptxt"></span><a href="#" id="reset" style="color:var(--mute)">reset ticks</a></div>
+<div class="toc"><a href="#step0"><b>0</b> Before you start</a><a href="#step1"><b>1</b> Thonny + MicroPython</a><a href="#step2"><b>2</b> OLED</a><a href="#step3"><b>3</b> Buzzer</a><a href="#step4"><b>4</b> Buttons</a><a href="#step5"><b>5</b> Wi-Fi</a><a href="#step6"><b>6</b> EMQX broker</a><a href="#step7"><b>7</b> Cube ↔ cloud</a><a href="#step8"><b>8</b> Firmware</a><a href="#step9"><b>9</b> Phone page</a><a href="#step10"><b>10</b> Cube #2</a><a href="#step11"><b>11</b> Change Wi-Fi</a><a href="#step12"><b>12</b> Glass cube</a><a href="#step13"><b>13</b> Final test</a><a href="#trouble">Troubleshooting</a><a href="#reference">Reference</a><a href="#appendix">Code</a></div></div></nav>
+<div class="wrap">
+<section class="step" id="step0"><div class="shead"><div class="badge">0</div><div><h2>Before you start</h2><div class="meta">⏱ about 15 min</div></div></div>
+<p>This is the whole plan in one picture. Each cube talks to a free cloud "post office" (EMQX). Your phone page talks to the same post office, so you can send text, drawings and photos from anywhere, and the cubes also have two buttons for one-press messages.</p>
+<figure><svg viewBox="0 0 800 380" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,sans-serif" role="img" aria-label="How messages travel">
+<defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#475569"/></marker></defs>
+<rect width="800" height="380" rx="14" fill="#f8fafc"/>
+<g transform="translate(40,90)"><polygon points="0,30 90,30 90,120 0,120" fill="#dbeafe" stroke="#60a5fa" stroke-width="2" opacity=".85"/><polygon points="0,30 28,6 118,6 90,30" fill="#eff6ff" stroke="#60a5fa" stroke-width="2"/><polygon points="90,30 118,6 118,96 90,120" fill="#bfdbfe" stroke="#60a5fa" stroke-width="2"/><rect x="12" y="46" width="66" height="40" rx="3" fill="#020617"/><text x="45" y="72" text-anchor="middle" font-size="14" fill="#7dd3fc" font-family="monospace" font-weight="700">Hi!</text><circle cx="28" cy="104" r="5" fill="#f97316"/><circle cx="62" cy="104" r="5" fill="#f97316"/><text x="59" y="152" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Lumi cube</text><text x="59" y="170" text-anchor="middle" font-size="12" fill="#475569">OLED + 2 buttons + buzzer</text></g>
+<g transform="translate(640,90)"><polygon points="0,30 90,30 90,120 0,120" fill="#dbeafe" stroke="#60a5fa" stroke-width="2" opacity=".85"/><polygon points="0,30 28,6 118,6 90,30" fill="#eff6ff" stroke="#60a5fa" stroke-width="2"/><polygon points="90,30 118,6 118,96 90,120" fill="#bfdbfe" stroke="#60a5fa" stroke-width="2"/><rect x="12" y="46" width="66" height="40" rx="3" fill="#020617"/><text x="45" y="72" text-anchor="middle" font-size="14" fill="#7dd3fc" font-family="monospace" font-weight="700">Hi!</text><circle cx="28" cy="104" r="5" fill="#f97316"/><circle cx="62" cy="104" r="5" fill="#f97316"/><text x="59" y="152" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Bumi cube</text><text x="59" y="170" text-anchor="middle" font-size="12" fill="#475569">OLED + 2 buttons + buzzer</text></g>
+<g transform="translate(300,70)"><path d="M60,120 a40,40 0 0 1 8,-79 a55,55 0 0 1 104,-6 a45,45 0 0 1 28,85 z" fill="#ede9fe" stroke="#8b5cf6" stroke-width="2.5"/><text x="100" y="82" text-anchor="middle" font-size="18" font-weight="800" fill="#4c1d95">EMQX Cloud</text><text x="100" y="102" text-anchor="middle" font-size="12" fill="#5b21b6">free MQTT post office</text></g>
+<line x1="160" y1="170" x2="300" y2="160" stroke="#475569" stroke-width="2.5" marker-end="url(#ar)" marker-start="url(#ar)"/>
+<line x1="640" y1="170" x2="500" y2="160" stroke="#475569" stroke-width="2.5" marker-end="url(#ar)" marker-start="url(#ar)"/>
+<text x="225" y="150" text-anchor="middle" font-size="11" fill="#475569">encrypted (TLS)</text>
+<text x="580" y="150" text-anchor="middle" font-size="11" fill="#475569">encrypted (TLS)</text>
+<g transform="translate(335,250)"><rect x="0" y="0" width="130" height="110" rx="14" fill="#fff" stroke="#0f172a" stroke-width="3"/><rect x="10" y="14" width="110" height="52" rx="3" fill="#020617"/><text x="65" y="46" text-anchor="middle" font-size="10.5" fill="#7dd3fc" font-family="monospace">Text·Draw·Photo</text><rect x="22" y="76" width="86" height="22" rx="11" fill="#6ea8ff"/><text x="65" y="91" text-anchor="middle" font-size="12" font-weight="700" fill="#06122b">Send ✨</text></g>
+<line x1="400" y1="250" x2="400" y2="198" stroke="#475569" stroke-width="2.5" marker-end="url(#ar)"/>
+<text x="410" y="228" font-size="11" fill="#475569">Phone page (wss)</text>
+<text x="40" y="292" font-size="13" fill="#0f172a" font-weight="700">What travels?</text>
+<text x="40" y="312" font-size="12" fill="#334155">• Quick presets  (button press)</text>
+<text x="40" y="330" font-size="12" fill="#334155">• Text, up to 300 letters</text>
+<text x="40" y="348" font-size="12" fill="#334155">• 128×64 pictures (1 KB each)</text>
+<text x="40" y="366" font-size="12" fill="#334155">• "online / offline" presence</text>
+</svg><figcaption>Cubes and phone never talk to each other directly. They all talk to EMQX over an encrypted connection.</figcaption></figure>
+
+<h3>What you have vs. what is still needed</h3>
+<table>
+<tr><th>Item (per cube)</th><th>Qty</th><th>Status</th></tr>
+<tr><td>ESP32-C3 Super Mini</td><td>1</td><td class="ok">✔ you have (need 2 total)</td></tr>
+<tr><td>0.96" I²C OLED, SSD1306, 128×64</td><td>1</td><td class="ok">✔ you have (need 2 total)</td></tr>
+<tr><td>Passive buzzer module</td><td>1</td><td class="ok">✔ you have (need 2 total)</td></tr>
+<tr><td>Tactile push buttons</td><td>2</td><td class="ok">✔ you have</td></tr>
+<tr><td>Jumper wires (female–male or male–male, depending on your parts)</td><td>~12</td><td class="ok">✔ you have</td></tr>
+<tr><td>USB-C data cable + 5 V charger</td><td>1</td><td class="ok">✔ you have</td></tr>
+<tr><td><b>Mini breadboard</b> <i>(or soldering iron + perfboard)</i></td><td>1</td><td class="need">⚠ not on your list — see note</td></tr>
+</table>
+<div class="note warn"><div class="ni">⚠️</div><div><b>Why a breadboard?</b> The Super Mini has only <b>one GND pin and one 3V3 pin</b> next to each other, but four things need ground (OLED, buzzer, 2 buttons) and two need 3V3. A breadboard's power rails (or a little solder) let several wires share one pin. A half-size breadboard is a few dollars. Without one, you would need to twist and solder wires together.</div></div>
+<div class="note info"><div class="ni">ℹ️</div><div><b>Two sets of everything.</b> You said you have the parts for both cubes. Build and test <b>cube #1 completely</b> first, then repeat quickly for cube #2.</div></div>
+
+<h3>Software you will install (all free)</h3>
+<ul>
+<li><b>Thonny</b> — a beginner-friendly editor that talks to the board (thonny.org, works on your Mac).</li>
+<li><b>MQTTX</b> <i>(optional but handy)</i> — a free app for peeking at messages (mqttx.app).</li>
+<li>A free <b>EMQX Cloud</b> account (step 6) and, later, a free <b>GitHub</b> account if you want the phone page online (step 9).</li>
+</ul>
+
+<h3>Words you will meet</h3>
+<table>
+<tr><td><b>GPIO</b></td><td>A numbered pin on the chip you can turn on/off or read (GPIO5 = pin "5").</td></tr>
+<tr><td><b>I²C</b></td><td>A two-wire way for the chip to talk to the screen: SDA (data) and SCL (clock).</td></tr>
+<tr><td><b>REPL</b></td><td>The prompt (<code>&gt;&gt;&gt;</code>) in Thonny's bottom panel where you type Python and get an instant answer.</td></tr>
+<tr><td><b>MQTT / broker</b></td><td>A "post office" system. Devices <i>publish</i> letters to a named <i>topic</i> and <i>subscribe</i> to topics they want to receive.</td></tr>
+<tr><td><b>Topic prefix</b></td><td>The private "room name" at the start of every topic. You will invent one; all your devices must match it.</td></tr>
+</table>
+</section><section class="step" id="step1"><div class="shead"><div class="badge">1</div><div><h2>Install Thonny and put MicroPython on the board</h2><div class="meta">⏱ about 20 min</div></div></div>
+<p>MicroPython is a tiny version of Python that runs on the ESP32. We install it once; after that you just copy Python files onto the board.</p>
+<ol class="steps">
+<li><b>Install Thonny</b> from <code>thonny.org</code> and open it.</li>
+<li><b>Plug the board into your Mac with the USB-C cable</b> (no wiring needed yet). Use a cable that carries data — some charge-only cables will not work.</li>
+<li>In Thonny choose <b>Run → Configure interpreter…</b>. In the first drop-down pick <b>MicroPython (ESP32)</b>. In "Port" pick the entry that looks like <code>/dev/cu.usbmodem…</code> (or "USB JTAG/serial debug unit").</li>
+<li>Click <b>Install or update MicroPython (esptool)</b> (bottom right of that window). Choose the same port, the <b>ESP32-C3</b> family and the generic <b>ESP32-C3</b> variant, keep "Erase flash" ticked, then <b>Install</b>. Wait until it says <i>Done</i>.</li>
+<li><b>If Thonny can't find the board:</b> put it in bootloader mode — <i>hold the BOOT button, tap RST, then release BOOT</i> (or hold BOOT while plugging in the cable). Then retry the install (item 4).</li>
+<li>Click OK. Unplug and re-plug the board. The bottom panel of Thonny should show <code>&gt;&gt;&gt;</code>.</li>
+</ol>
+<div class="note info"><div class="ni">ℹ️</div><div>Prefer the command line? Download the <code>ESP32_GENERIC_C3</code> .bin from <code>micropython.org/download/ESP32_GENERIC_C3/</code>, then <code>pip install esptool</code> and run <code>esptool --chip esp32c3 --port /dev/cu.usbmodemXXXX erase-flash</code> followed by <code>esptool --chip esp32c3 --port /dev/cu.usbmodemXXXX write-flash -z 0x0 FIRMWARE.bin</code> (older esptool versions spell these <code>erase_flash</code> / <code>write_flash</code>).</div></div>
+<h3>Say hello to the board</h3>
+<p>Click in the bottom panel (the REPL), paste the snippet below and press Enter:</p>
+<div class="code"><div class="ctitle">REPL</div><button class="copy" type="button">Copy</button><pre><code>import os, machine
+print(os.uname())
+print(machine.freq())</code></pre></div>
+<div class="tests"><h4>✅ Test checklist <span class="hint">(tick each one before moving on)</span></h4>
+<label class="chk"><input type="checkbox" data-id="s1-0"><span>The bottom panel shows <code>&gt;&gt;&gt;</code> without errors.</span></label>
+<label class="chk"><input type="checkbox" data-id="s1-1"><span><code>os.uname()</code> output mentions <b>ESP32C3</b> and a MicroPython version.</span></label>
+<label class="chk"><input type="checkbox" data-id="s1-2"><span><code>machine.freq()</code> prints <b>160000000</b> (160 MHz).</span></label>
+</div>
+</section><section class="step" id="step2"><div class="shead"><div class="badge">2</div><div><h2>Wire up and test the OLED screen</h2><div class="meta">⏱ about 20 min</div></div></div>
+<p>Unplug USB before wiring. Four wires connect the screen. <b>Match the labels printed on <i>your</i> module and board</b> — module pin order varies, and the diagram below is a guide.</p>
+<figure><svg viewBox="0 0 740 450" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,sans-serif" role="img" aria-label="Wiring diagram">
+<rect width="740" height="450" rx="14" fill="#f8fafc"/>
+<text x="20" y="26" font-size="14" font-weight="700" fill="#0f172a">Step 2 — OLED only</text>
+<rect x="300" y="40" width="160" height="366" rx="12" fill="#0f2a43" stroke="#0b1b2c" stroke-width="2"/><rect x="354" y="26" width="52" height="30" rx="6" fill="#cbd5e1" stroke="#64748b" stroke-width="1.5"/><text x="380" y="46" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">USB-C</text><text x="380" y="78" text-anchor="middle" font-size="12" fill="#7dd3fc" font-weight="700">ESP32-C3</text><text x="380" y="93" text-anchor="middle" font-size="11" fill="#7dd3fc">Super Mini</text><circle cx="300" cy="120" r="5.5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="314" y="124" font-size="11.5" fill="#fff" font-weight="700">GPIO5 · SDA</text><circle cx="300" cy="156" r="5.5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="314" y="160" font-size="11.5" fill="#fff" font-weight="700">GPIO6 · SCL</text><circle cx="300" cy="192" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="314" y="196" font-size="11.5" fill="#94a3b8" font-weight="400">GPIO7</text><circle cx="300" cy="228" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="314" y="232" font-size="11.5" fill="#94a3b8" font-weight="400">GPIO8</text><circle cx="300" cy="264" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="314" y="268" font-size="11.5" fill="#94a3b8" font-weight="400">GPIO9</text><circle cx="300" cy="300" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="314" y="304" font-size="11.5" fill="#94a3b8" font-weight="400">GPIO10</text><circle cx="300" cy="336" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="314" y="340" font-size="11.5" fill="#94a3b8" font-weight="400">GPIO20</text><circle cx="300" cy="372" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="314" y="376" font-size="11.5" fill="#94a3b8" font-weight="400">GPIO21</text><circle cx="460" cy="120" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="446" y="124" font-size="11.5" fill="#94a3b8" text-anchor="end" font-weight="400">5V</text><circle cx="460" cy="156" r="5.5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="446" y="160" font-size="11.5" fill="#fff" text-anchor="end" font-weight="700">GND</text><circle cx="460" cy="192" r="5.5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="446" y="196" font-size="11.5" fill="#fff" text-anchor="end" font-weight="700">3V3</text><circle cx="460" cy="228" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="446" y="232" font-size="11.5" fill="#94a3b8" text-anchor="end" font-weight="400">GPIO4</text><circle cx="460" cy="264" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="446" y="268" font-size="11.5" fill="#94a3b8" text-anchor="end" font-weight="400">GPIO3</text><circle cx="460" cy="300" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="446" y="304" font-size="11.5" fill="#94a3b8" text-anchor="end" font-weight="400">GPIO2</text><circle cx="460" cy="336" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="446" y="340" font-size="11.5" fill="#94a3b8" text-anchor="end" font-weight="400">GPIO1</text><circle cx="460" cy="372" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="446" y="376" font-size="11.5" fill="#94a3b8" text-anchor="end" font-weight="400">GPIO0</text>
+<g opacity="1"><rect x="30" y="96" width="160" height="148" rx="10" fill="#111827" stroke="#0b1220" stroke-width="2"/><rect x="42" y="108" width="84" height="124" rx="4" fill="#020617" stroke="#38bdf8" stroke-width="1.5"/><text x="84" y="160" text-anchor="middle" font-size="16" fill="#7dd3fc" font-family="monospace" font-weight="700">Hi!</text><text x="84" y="180" text-anchor="middle" font-size="22" fill="#fb7185">♥</text><circle cx="190" cy="120" r="5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="180" y="124" text-anchor="end" font-size="11.5" fill="#e5e7eb" font-weight="700">SDA</text><circle cx="190" cy="156" r="5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="180" y="160" text-anchor="end" font-size="11.5" fill="#e5e7eb" font-weight="700">SCL</text><circle cx="190" cy="192" r="5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="180" y="196" text-anchor="end" font-size="11.5" fill="#e5e7eb" font-weight="700">VCC</text><circle cx="190" cy="228" r="5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="180" y="232" text-anchor="end" font-size="11.5" fill="#e5e7eb" font-weight="700">GND</text><text x="110" y="262" text-anchor="middle" font-size="12" fill="#334155" font-weight="700">0.96" OLED (SSD1306)</text></g>
+<g opacity="1"><polyline points="190,120 300,120" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="190,120 300,120" fill="none" stroke="#2563eb" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><polyline points="190,156 300,156" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="190,156 300,156" fill="none" stroke="#ca8a04" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><polyline points="190,192 224,192" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="190,192 224,192" fill="none" stroke="#e11d48" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><rect x="224" y="182" width="38" height="20" rx="5" fill="#e11d48"/><text x="243" y="196.5" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">3V3</text><polyline points="190,228 224,228" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="190,228 224,228" fill="none" stroke="#1f2937" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><rect x="224" y="218" width="38" height="20" rx="5" fill="#1f2937"/><text x="243" y="232.5" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">GND</text></g>
+<polyline points="460,156 496,156" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="460,156 496,156" fill="none" stroke="#1f2937" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><rect x="496" y="146" width="38" height="20" rx="5" fill="#1f2937"/><text x="515" y="160.5" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">GND</text>
+<polyline points="460,192 496,192" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="460,192 496,192" fill="none" stroke="#e11d48" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><rect x="496" y="182" width="38" height="20" rx="5" fill="#e11d48"/><text x="515" y="196.5" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">3V3</text>
+<text x="720" y="436" text-anchor="end" font-size="11" fill="#475569">Same-colour tags (3V3 / GND) are joined together — see "Sharing power" below.</text>
+</svg><figcaption>Blue = SDA (data), yellow = SCL (clock). Red tag = 3V3, dark tag = GND.</figcaption></figure>
+<table>
+<tr><th>OLED pin</th><th>→</th><th>ESP32-C3 Super Mini</th></tr>
+<tr><td>GND</td><td>→</td><td>GND (via your GND rail)</td></tr>
+<tr><td>VCC</td><td>→</td><td><b>3V3</b> (via your 3V3 rail) — <b>not</b> 5V</td></tr>
+<tr><td>SDA</td><td>→</td><td>GPIO5</td></tr>
+<tr><td>SCL</td><td>→</td><td>GPIO6</td></tr>
+</table>
+<figure><svg viewBox="0 0 740 330" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,sans-serif" role="img" aria-label="Sharing 3V3 and GND">
+<rect width="740" height="330" rx="14" fill="#f8fafc"/>
+<rect x="20" y="40" width="130" height="90" rx="10" fill="#0f2a43"/><text x="85" y="62" text-anchor="middle" font-size="12" fill="#7dd3fc" font-weight="700">ESP32-C3</text>
+<circle cx="150" cy="85" r="6" fill="#fbbf24"/><text x="140" y="89" text-anchor="end" font-size="12" fill="#fff" font-weight="700">3V3</text>
+<circle cx="150" cy="115" r="6" fill="#fbbf24"/><text x="140" y="119" text-anchor="end" font-size="12" fill="#fff" font-weight="700">GND</text>
+<rect x="230" y="60" width="470" height="18" rx="9" fill="#fecdd3" stroke="#e11d48" stroke-width="2"/><text x="240" y="73" font-size="11" font-weight="700" fill="#9f1239">+ 3V3 rail</text>
+<rect x="230" y="100" width="470" height="18" rx="9" fill="#d1d5db" stroke="#1f2937" stroke-width="2"/><text x="240" y="113" font-size="11" font-weight="700" fill="#111827">− GND rail</text>
+<polyline points="150,85 200,85 200,69 230,69" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="150,85 200,85 200,69 230,69" fill="none" stroke="#e11d48" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="150,115 215,115 215,109 230,109" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="150,115 215,115 215,109 230,109" fill="none" stroke="#1f2937" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="285" y="210" width="90" height="46" rx="8" fill="#e2e8f0" stroke="#475569" stroke-width="2"/><text x="330" y="238" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">OLED</text>
+<polyline points="315,210 315,69" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="315,210 315,69" fill="none" stroke="#e11d48" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="315" cy="69" r="4.5" fill="#e11d48"/><text x="309" y="196" text-anchor="end" font-size="11" font-weight="700" fill="#e11d48">VCC</text>
+<polyline points="345,210 345,109" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="345,210 345,109" fill="none" stroke="#1f2937" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="345" cy="109" r="4.5" fill="#1f2937"/><text x="351" y="196" font-size="11" font-weight="700" fill="#1f2937">GND</text>
+<rect x="395" y="210" width="90" height="46" rx="8" fill="#e2e8f0" stroke="#475569" stroke-width="2"/><text x="440" y="238" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Buzzer</text>
+<polyline points="425,210 425,69" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="425,210 425,69" fill="none" stroke="#e11d48" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="425" cy="69" r="4.5" fill="#e11d48"/><text x="419" y="196" text-anchor="end" font-size="11" font-weight="700" fill="#e11d48">VCC</text>
+<polyline points="455,210 455,109" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="455,210 455,109" fill="none" stroke="#1f2937" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="455" cy="109" r="4.5" fill="#1f2937"/><text x="461" y="196" font-size="11" font-weight="700" fill="#1f2937">GND</text>
+<rect x="505" y="210" width="90" height="46" rx="8" fill="#e2e8f0" stroke="#475569" stroke-width="2"/><text x="550" y="238" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Button A</text>
+<polyline points="565,210 565,109" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="565,210 565,109" fill="none" stroke="#1f2937" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="565" cy="109" r="4.5" fill="#1f2937"/><text x="571" y="196" font-size="11" font-weight="700" fill="#1f2937">GND</text>
+<rect x="605" y="210" width="90" height="46" rx="8" fill="#e2e8f0" stroke="#475569" stroke-width="2"/><text x="650" y="238" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Button B</text>
+<polyline points="665,210 665,109" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="665,210 665,109" fill="none" stroke="#1f2937" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="665" cy="109" r="4.5" fill="#1f2937"/><text x="671" y="196" font-size="11" font-weight="700" fill="#1f2937">GND</text>
+<text x="20" y="300" font-size="13" fill="#334155">One pin hole can only take one wire, so 3V3 and GND each go to a shared strip (a "rail").</text>
+<text x="20" y="318" font-size="13" fill="#334155">On a breadboard a rail is a row of holes joined underneath. Buttons only need GND; their other leg goes to a GPIO.</text>
+</svg><figcaption>Sharing power: the 3V3 pin feeds one rail, the GND pin feeds another. Everything else plugs into the rails.</figcaption></figure>
+<div class="note warn"><div class="ni">⚠️</div><div><b>Check the board's own labels.</b> Super Mini boards are very consistent, but clones exist. The pins used in this guide (5, 6, 7 on one side; 3, 4 and 3V3, GND on the other) are chosen to avoid the three "strapping" pins (GPIO2, 8, 9) that can disturb boot. If your silkscreen differs, tell me and I'll adapt it.</div></div>
+<h3>Test A — does the board see the screen?</h3>
+<p>Plug USB in, then in the REPL:</p>
+<div class="code"><div class="ctitle">REPL</div><button class="copy" type="button">Copy</button><pre><code>from machine import Pin, I2C
+i2c = I2C(0, sda=Pin(5), scl=Pin(6), freq=400000)
+print(i2c.scan())      # expect [60]   (60 = 0x3C, the OLED&#x27;s address)</code></pre></div>
+<h3>Test B — put words on it</h3>
+<p>In Thonny open <b>View → Files</b>. In the top (This computer) pane, navigate to <code>lumi-bumi/firmware</code>, right-click <code>ssd1306.py</code> and choose <b>Upload to /</b>. Then paste:</p>
+<div class="code"><div class="ctitle">REPL</div><button class="copy" type="button">Copy</button><pre><code>from machine import Pin, I2C
+import ssd1306
+
+i2c = I2C(0, sda=Pin(5), scl=Pin(6), freq=400000)
+oled = ssd1306.SSD1306_I2C(128, 64, i2c)
+oled.fill(0)
+oled.text(&quot;Hello Lumi!&quot;, 0, 0)
+oled.text(&quot;Hello Bumi!&quot;, 0, 16)
+oled.rect(0, 32, 128, 32, 1)     # a border around the bottom half
+oled.show()</code></pre></div>
+<div class="tests"><h4>✅ Test checklist <span class="hint">(tick each one before moving on)</span></h4>
+<label class="chk"><input type="checkbox" data-id="s2-0"><span><code>i2c.scan()</code> printed <code>[60]</code>.</span></label>
+<label class="chk"><input type="checkbox" data-id="s2-1"><span>The screen shows <b>Hello Lumi!</b>, <b>Hello Bumi!</b> and a rectangle.</span></label>
+<label class="chk"><input type="checkbox" data-id="s2-2"><span>Text is sharp and not upside down or shifted (see troubleshooting if not).</span></label>
+<label class="chk"><input type="checkbox" data-id="s2-3"><span>The module doesn't get hot.</span></label>
+</div>
+</section><section class="step" id="step3"><div class="shead"><div class="badge">3</div><div><h2>Add the buzzer and test the sound</h2><div class="meta">⏱ about 10 min</div></div></div>
+<figure><svg viewBox="0 0 740 450" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,sans-serif" role="img" aria-label="Wiring diagram">
+<rect width="740" height="450" rx="14" fill="#f8fafc"/>
+<text x="20" y="26" font-size="14" font-weight="700" fill="#0f172a">Step 3 — add the buzzer (orange wire)</text>
+<rect x="300" y="40" width="160" height="366" rx="12" fill="#0f2a43" stroke="#0b1b2c" stroke-width="2"/><rect x="354" y="26" width="52" height="30" rx="6" fill="#cbd5e1" stroke="#64748b" stroke-width="1.5"/><text x="380" y="46" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">USB-C</text><text x="380" y="78" text-anchor="middle" font-size="12" fill="#7dd3fc" font-weight="700">ESP32-C3</text><text x="380" y="93" text-anchor="middle" font-size="11" fill="#7dd3fc">Super Mini</text><circle cx="300" cy="120" r="5.5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="314" y="124" font-size="11.5" fill="#fff" font-weight="700">GPIO5 · SDA</text><circle cx="300" cy="156" r="5.5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="314" y="160" font-size="11.5" fill="#fff" font-weight="700">GPIO6 · SCL</text><circle cx="300" cy="192" r="5.5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="314" y="196" font-size="11.5" fill="#fff" font-weight="700">GPIO7 · BUZZER</text><circle cx="300" cy="228" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="314" y="232" font-size="11.5" fill="#94a3b8" font-weight="400">GPIO8</text><circle cx="300" cy="264" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="314" y="268" font-size="11.5" fill="#94a3b8" font-weight="400">GPIO9</text><circle cx="300" cy="300" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="314" y="304" font-size="11.5" fill="#94a3b8" font-weight="400">GPIO10</text><circle cx="300" cy="336" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="314" y="340" font-size="11.5" fill="#94a3b8" font-weight="400">GPIO20</text><circle cx="300" cy="372" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="314" y="376" font-size="11.5" fill="#94a3b8" font-weight="400">GPIO21</text><circle cx="460" cy="120" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="446" y="124" font-size="11.5" fill="#94a3b8" text-anchor="end" font-weight="400">5V</text><circle cx="460" cy="156" r="5.5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="446" y="160" font-size="11.5" fill="#fff" text-anchor="end" font-weight="700">GND</text><circle cx="460" cy="192" r="5.5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="446" y="196" font-size="11.5" fill="#fff" text-anchor="end" font-weight="700">3V3</text><circle cx="460" cy="228" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="446" y="232" font-size="11.5" fill="#94a3b8" text-anchor="end" font-weight="400">GPIO4</text><circle cx="460" cy="264" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="446" y="268" font-size="11.5" fill="#94a3b8" text-anchor="end" font-weight="400">GPIO3</text><circle cx="460" cy="300" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="446" y="304" font-size="11.5" fill="#94a3b8" text-anchor="end" font-weight="400">GPIO2</text><circle cx="460" cy="336" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="446" y="340" font-size="11.5" fill="#94a3b8" text-anchor="end" font-weight="400">GPIO1</text><circle cx="460" cy="372" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="446" y="376" font-size="11.5" fill="#94a3b8" text-anchor="end" font-weight="400">GPIO0</text>
+<g opacity="0.45"><rect x="30" y="96" width="160" height="148" rx="10" fill="#111827" stroke="#0b1220" stroke-width="2"/><rect x="42" y="108" width="84" height="124" rx="4" fill="#020617" stroke="#38bdf8" stroke-width="1.5"/><text x="84" y="160" text-anchor="middle" font-size="16" fill="#7dd3fc" font-family="monospace" font-weight="700">Hi!</text><text x="84" y="180" text-anchor="middle" font-size="22" fill="#fb7185">♥</text><circle cx="190" cy="120" r="5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="180" y="124" text-anchor="end" font-size="11.5" fill="#e5e7eb" font-weight="700">SDA</text><circle cx="190" cy="156" r="5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="180" y="160" text-anchor="end" font-size="11.5" fill="#e5e7eb" font-weight="700">SCL</text><circle cx="190" cy="192" r="5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="180" y="196" text-anchor="end" font-size="11.5" fill="#e5e7eb" font-weight="700">VCC</text><circle cx="190" cy="228" r="5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="180" y="232" text-anchor="end" font-size="11.5" fill="#e5e7eb" font-weight="700">GND</text><text x="110" y="262" text-anchor="middle" font-size="12" fill="#334155" font-weight="700">0.96" OLED (SSD1306)</text></g>
+<g opacity="0.45"><polyline points="190,120 300,120" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="190,120 300,120" fill="none" stroke="#2563eb" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><polyline points="190,156 300,156" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="190,156 300,156" fill="none" stroke="#ca8a04" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><polyline points="190,192 224,192" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="190,192 224,192" fill="none" stroke="#e11d48" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><rect x="224" y="182" width="38" height="20" rx="5" fill="#e11d48"/><text x="243" y="196.5" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">3V3</text><polyline points="190,228 224,228" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="190,228 224,228" fill="none" stroke="#1f2937" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><rect x="224" y="218" width="38" height="20" rx="5" fill="#1f2937"/><text x="243" y="232.5" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">GND</text></g>
+<g opacity="1"><rect x="30" y="300" width="160" height="110" rx="10" fill="#111827" stroke="#0b1220" stroke-width="2"/><circle cx="84" cy="355" r="34" fill="#1f2937" stroke="#9ca3af" stroke-width="3"/><circle cx="84" cy="355" r="9" fill="#030712"/><text x="84" y="355" text-anchor="middle" font-size="1"> </text><circle cx="190" cy="326" r="5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="180" y="330" text-anchor="end" font-size="11.5" fill="#e5e7eb" font-weight="700">S / I/O</text><circle cx="190" cy="358" r="5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="180" y="362" text-anchor="end" font-size="11.5" fill="#e5e7eb" font-weight="700">VCC / +</text><circle cx="190" cy="390" r="5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="180" y="394" text-anchor="end" font-size="11.5" fill="#e5e7eb" font-weight="700">GND / −</text><text x="110" y="428" text-anchor="middle" font-size="12" fill="#334155" font-weight="700">Passive buzzer module</text></g>
+<g opacity="1"><polyline points="190,326 272,326 272,192 300,192" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="190,326 272,326 272,192 300,192" fill="none" stroke="#ea580c" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><polyline points="190,358 224,358" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="190,358 224,358" fill="none" stroke="#e11d48" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><rect x="224" y="348" width="38" height="20" rx="5" fill="#e11d48"/><text x="243" y="362.5" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">3V3</text><polyline points="190,390 224,390" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="190,390 224,390" fill="none" stroke="#1f2937" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><rect x="224" y="380" width="38" height="20" rx="5" fill="#1f2937"/><text x="243" y="394.5" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">GND</text></g>
+<polyline points="460,156 496,156" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="460,156 496,156" fill="none" stroke="#1f2937" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><rect x="496" y="146" width="38" height="20" rx="5" fill="#1f2937"/><text x="515" y="160.5" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">GND</text>
+<polyline points="460,192 496,192" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="460,192 496,192" fill="none" stroke="#e11d48" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><rect x="496" y="182" width="38" height="20" rx="5" fill="#e11d48"/><text x="515" y="196.5" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">3V3</text>
+<text x="720" y="436" text-anchor="end" font-size="11" fill="#475569">Same-colour tags (3V3 / GND) are joined together — see "Sharing power" below.</text>
+</svg><figcaption>New in this step: orange signal wire to GPIO7, plus the buzzer's 3V3 and GND.</figcaption></figure>
+<table>
+<tr><th>Buzzer pin</th><th>→</th><th>ESP32-C3</th></tr>
+<tr><td>S / I/O / SIG</td><td>→</td><td>GPIO7</td></tr>
+<tr><td>VCC / +</td><td>→</td><td>3V3 rail</td></tr>
+<tr><td>GND / −</td><td>→</td><td>GND rail</td></tr>
+</table>
+<div class="code"><div class="ctitle">REPL</div><button class="copy" type="button">Copy</button><pre><code>from machine import Pin, PWM
+import time
+
+buz = PWM(Pin(7), freq=1000, duty_u16=0)
+for f in (523, 659, 784, 1047):      # C E G C
+    buz.freq(f)
+    buz.duty_u16(32768)
+    time.sleep_ms(250)
+buz.duty_u16(0)                      # silence</code></pre></div>
+<div class="note tip"><div class="ni">💡</div><div><b>Too quiet?</b> A 5 V module on 3.3 V is a bit softer. Move its VCC wire to the board's <b>5V</b> pin (that's USB power). The signal from GPIO7 is still 3.3 V, which most transistor-driven modules accept. Keep this as a last resort and re-test.</div></div>
+<h4>Does your module just beep all by itself? Or stay silent?</h4>
+<p>Passive buzzers need the chip to make the tone (that's what the test does). If you accidentally have an <b>active</b> buzzer, it beeps whenever it just gets power. To check, run:</p>
+<div class="code"><div class="ctitle">REPL</div><button class="copy" type="button">Copy</button><pre><code>from machine import Pin
+Pin(7, Pin.OUT).value(1)    # steady voltage. Any sound at all = it&#x27;s an ACTIVE buzzer
+# Pin(7, Pin.OUT).value(0)  # run this to stop it</code></pre></div>
+<p>Sound from that = active buzzer: it only makes one fixed beep, so the melodies would sound the same. Everything else still works.</p>
+<div class="tests"><h4>✅ Test checklist <span class="hint">(tick each one before moving on)</span></h4>
+<label class="chk"><input type="checkbox" data-id="s3-0"><span>You heard four rising notes (C-E-G-C).</span></label>
+<label class="chk"><input type="checkbox" data-id="s3-1"><span>After the notes, it's completely silent.</span></label>
+<label class="chk"><input type="checkbox" data-id="s3-2"><span>The OLED test from step 2 still works (nothing came loose).</span></label>
+</div>
+</section><section class="step" id="step4"><div class="shead"><div class="badge">4</div><div><h2>Add the two buttons and test them</h2><div class="meta">⏱ about 10 min</div></div></div>
+<figure><svg viewBox="0 0 740 450" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,sans-serif" role="img" aria-label="Wiring diagram">
+<rect width="740" height="450" rx="14" fill="#f8fafc"/>
+<text x="20" y="26" font-size="14" font-weight="700" fill="#0f172a">Step 4 — add the buttons (green = B, purple = A)</text>
+<rect x="300" y="40" width="160" height="366" rx="12" fill="#0f2a43" stroke="#0b1b2c" stroke-width="2"/><rect x="354" y="26" width="52" height="30" rx="6" fill="#cbd5e1" stroke="#64748b" stroke-width="1.5"/><text x="380" y="46" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">USB-C</text><text x="380" y="78" text-anchor="middle" font-size="12" fill="#7dd3fc" font-weight="700">ESP32-C3</text><text x="380" y="93" text-anchor="middle" font-size="11" fill="#7dd3fc">Super Mini</text><circle cx="300" cy="120" r="5.5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="314" y="124" font-size="11.5" fill="#fff" font-weight="700">GPIO5 · SDA</text><circle cx="300" cy="156" r="5.5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="314" y="160" font-size="11.5" fill="#fff" font-weight="700">GPIO6 · SCL</text><circle cx="300" cy="192" r="5.5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="314" y="196" font-size="11.5" fill="#fff" font-weight="700">GPIO7 · BUZZER</text><circle cx="300" cy="228" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="314" y="232" font-size="11.5" fill="#94a3b8" font-weight="400">GPIO8</text><circle cx="300" cy="264" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="314" y="268" font-size="11.5" fill="#94a3b8" font-weight="400">GPIO9</text><circle cx="300" cy="300" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="314" y="304" font-size="11.5" fill="#94a3b8" font-weight="400">GPIO10</text><circle cx="300" cy="336" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="314" y="340" font-size="11.5" fill="#94a3b8" font-weight="400">GPIO20</text><circle cx="300" cy="372" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="314" y="376" font-size="11.5" fill="#94a3b8" font-weight="400">GPIO21</text><circle cx="460" cy="120" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="446" y="124" font-size="11.5" fill="#94a3b8" text-anchor="end" font-weight="400">5V</text><circle cx="460" cy="156" r="5.5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="446" y="160" font-size="11.5" fill="#fff" text-anchor="end" font-weight="700">GND</text><circle cx="460" cy="192" r="5.5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="446" y="196" font-size="11.5" fill="#fff" text-anchor="end" font-weight="700">3V3</text><circle cx="460" cy="228" r="5.5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="446" y="232" font-size="11.5" fill="#fff" text-anchor="end" font-weight="700">BTN B · GPIO4</text><circle cx="460" cy="264" r="5.5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="446" y="268" font-size="11.5" fill="#fff" text-anchor="end" font-weight="700">BTN A · GPIO3</text><circle cx="460" cy="300" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="446" y="304" font-size="11.5" fill="#94a3b8" text-anchor="end" font-weight="400">GPIO2</text><circle cx="460" cy="336" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="446" y="340" font-size="11.5" fill="#94a3b8" text-anchor="end" font-weight="400">GPIO1</text><circle cx="460" cy="372" r="5.5" fill="#64748b" stroke="#0f172a" stroke-width="1.5"/><text x="446" y="376" font-size="11.5" fill="#94a3b8" text-anchor="end" font-weight="400">GPIO0</text>
+<g opacity="0.45"><rect x="30" y="96" width="160" height="148" rx="10" fill="#111827" stroke="#0b1220" stroke-width="2"/><rect x="42" y="108" width="84" height="124" rx="4" fill="#020617" stroke="#38bdf8" stroke-width="1.5"/><text x="84" y="160" text-anchor="middle" font-size="16" fill="#7dd3fc" font-family="monospace" font-weight="700">Hi!</text><text x="84" y="180" text-anchor="middle" font-size="22" fill="#fb7185">♥</text><circle cx="190" cy="120" r="5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="180" y="124" text-anchor="end" font-size="11.5" fill="#e5e7eb" font-weight="700">SDA</text><circle cx="190" cy="156" r="5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="180" y="160" text-anchor="end" font-size="11.5" fill="#e5e7eb" font-weight="700">SCL</text><circle cx="190" cy="192" r="5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="180" y="196" text-anchor="end" font-size="11.5" fill="#e5e7eb" font-weight="700">VCC</text><circle cx="190" cy="228" r="5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="180" y="232" text-anchor="end" font-size="11.5" fill="#e5e7eb" font-weight="700">GND</text><text x="110" y="262" text-anchor="middle" font-size="12" fill="#334155" font-weight="700">0.96" OLED (SSD1306)</text></g>
+<g opacity="0.45"><polyline points="190,120 300,120" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="190,120 300,120" fill="none" stroke="#2563eb" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><polyline points="190,156 300,156" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="190,156 300,156" fill="none" stroke="#ca8a04" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><polyline points="190,192 224,192" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="190,192 224,192" fill="none" stroke="#e11d48" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><rect x="224" y="182" width="38" height="20" rx="5" fill="#e11d48"/><text x="243" y="196.5" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">3V3</text><polyline points="190,228 224,228" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="190,228 224,228" fill="none" stroke="#1f2937" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><rect x="224" y="218" width="38" height="20" rx="5" fill="#1f2937"/><text x="243" y="232.5" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">GND</text></g>
+<g opacity="0.45"><rect x="30" y="300" width="160" height="110" rx="10" fill="#111827" stroke="#0b1220" stroke-width="2"/><circle cx="84" cy="355" r="34" fill="#1f2937" stroke="#9ca3af" stroke-width="3"/><circle cx="84" cy="355" r="9" fill="#030712"/><text x="84" y="355" text-anchor="middle" font-size="1"> </text><circle cx="190" cy="326" r="5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="180" y="330" text-anchor="end" font-size="11.5" fill="#e5e7eb" font-weight="700">S / I/O</text><circle cx="190" cy="358" r="5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="180" y="362" text-anchor="end" font-size="11.5" fill="#e5e7eb" font-weight="700">VCC / +</text><circle cx="190" cy="390" r="5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><text x="180" y="394" text-anchor="end" font-size="11.5" fill="#e5e7eb" font-weight="700">GND / −</text><text x="110" y="428" text-anchor="middle" font-size="12" fill="#334155" font-weight="700">Passive buzzer module</text></g>
+<g opacity="0.45"><polyline points="190,326 272,326 272,192 300,192" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="190,326 272,326 272,192 300,192" fill="none" stroke="#ea580c" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><polyline points="190,358 224,358" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="190,358 224,358" fill="none" stroke="#e11d48" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><rect x="224" y="348" width="38" height="20" rx="5" fill="#e11d48"/><text x="243" y="362.5" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">3V3</text><polyline points="190,390 224,390" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="190,390 224,390" fill="none" stroke="#1f2937" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><rect x="224" y="380" width="38" height="20" rx="5" fill="#1f2937"/><text x="243" y="394.5" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">GND</text></g>
+<polyline points="460,156 496,156" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="460,156 496,156" fill="none" stroke="#1f2937" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><rect x="496" y="146" width="38" height="20" rx="5" fill="#1f2937"/><text x="515" y="160.5" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">GND</text>
+<polyline points="460,192 496,192" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="460,192 496,192" fill="none" stroke="#e11d48" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><rect x="496" y="182" width="38" height="20" rx="5" fill="#e11d48"/><text x="515" y="196.5" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">3V3</text>
+<g opacity="1"><rect x="540" y="214" width="90" height="28" rx="6" fill="#e2e8f0" stroke="#475569" stroke-width="2"/><text x="585" y="232" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">BTN B</text><circle cx="540" cy="228" r="4.5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><circle cx="630" cy="228" r="4.5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/></g><g opacity="1"><rect x="540" y="250" width="90" height="28" rx="6" fill="#e2e8f0" stroke="#475569" stroke-width="2"/><text x="585" y="268" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">BTN A</text><circle cx="540" cy="264" r="4.5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/><circle cx="630" cy="264" r="4.5" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/></g>
+<g opacity="1"><polyline points="460,228 540,228" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="460,228 540,228" fill="none" stroke="#16a34a" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><polyline points="630,228 664,228" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="630,228 664,228" fill="none" stroke="#1f2937" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><rect x="664" y="218" width="38" height="20" rx="5" fill="#1f2937"/><text x="683" y="232.5" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">GND</text><polyline points="460,264 540,264" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="460,264 540,264" fill="none" stroke="#7c3aed" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><polyline points="630,264 664,264" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/><polyline points="630,264 664,264" fill="none" stroke="#1f2937" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><rect x="664" y="254" width="38" height="20" rx="5" fill="#1f2937"/><text x="683" y="268.5" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">GND</text></g>
+<text x="720" y="436" text-anchor="end" font-size="11" fill="#475569">Same-colour tags (3V3 / GND) are joined together — see "Sharing power" below.</text>
+</svg><figcaption>Each button connects one GPIO to GND. No resistors needed — the chip has built-in pull-ups.</figcaption></figure>
+<table>
+<tr><th>Button</th><th>Leg 1</th><th>Leg 2</th></tr>
+<tr><td>A</td><td>GPIO3</td><td>GND rail</td></tr>
+<tr><td>B</td><td>GPIO4</td><td>GND rail</td></tr>
+</table>
+<div class="note tip"><div class="ni">💡</div><div>A 4-legged tactile switch has its legs joined in pairs <i>inside</i>. Use two <b>diagonally opposite</b> legs — that always works. If a button seems to be "always pressed", rotate it 90°.</div></div>
+<div class="code"><div class="ctitle">REPL — press the red Stop button in Thonny when done</div><button class="copy" type="button">Copy</button><pre><code>from machine import Pin
+import time
+
+a = Pin(3, Pin.IN, Pin.PULL_UP)
+b = Pin(4, Pin.IN, Pin.PULL_UP)
+last = None
+while True:
+    state = (a.value(), b.value())          # 1 = not pressed, 0 = pressed
+    if state != last:
+        print(&quot;A:&quot;, &quot;PRESSED&quot; if state[0] == 0 else &quot;-&quot;, &quot;  B:&quot;, &quot;PRESSED&quot; if state[1] == 0 else &quot;-&quot;)
+        last = state
+    time.sleep_ms(20)</code></pre></div>
+<div class="tests"><h4>✅ Test checklist <span class="hint">(tick each one before moving on)</span></h4>
+<label class="chk"><input type="checkbox" data-id="s4-0"><span>With nothing pressed, nothing prints beyond the first line.</span></label>
+<label class="chk"><input type="checkbox" data-id="s4-1"><span>Pressing A prints <code>A: PRESSED</code> and releasing prints <code>A: -</code>.</span></label>
+<label class="chk"><input type="checkbox" data-id="s4-2"><span>Same for B, independently.</span></label>
+<label class="chk"><input type="checkbox" data-id="s4-3"><span>Pressing both shows both as PRESSED.</span></label>
+</div>
+</section><section class="step" id="step5"><div class="shead"><div class="badge">5</div><div><h2>Test Wi-Fi</h2><div class="meta">⏱ about 10 min</div></div></div>
+<p>The ESP32 uses <b>2.4 GHz Wi-Fi only</b>. If your router has separate 2.4/5 GHz names, use the 2.4 one.</p>
+<div class="code"><div class="ctitle">REPL (edit the first two lines)</div><button class="copy" type="button">Copy</button><pre><code>import network, time
+
+SSID = &quot;YOUR_WIFI_NAME&quot;
+PASSWORD = &quot;YOUR_WIFI_PASSWORD&quot;
+
+wlan = network.WLAN(network.STA_IF)
+wlan.active(True)
+# wlan.config(txpower=8.5)      # &lt;- un-comment if it refuses to connect
+wlan.connect(SSID, PASSWORD)
+for _ in range(30):
+    if wlan.isconnected():
+        break
+    time.sleep(1)
+print(&quot;connected:&quot;, wlan.isconnected())
+print(wlan.ifconfig())          # (ip, netmask, gateway, dns)</code></pre></div>
+<div class="tests"><h4>✅ Test checklist <span class="hint">(tick each one before moving on)</span></h4>
+<label class="chk"><input type="checkbox" data-id="s5-0"><span><code>connected: True</code> is printed.</span></label>
+<label class="chk"><input type="checkbox" data-id="s5-1"><span><code>ifconfig()</code> shows an IP address like <code>192.168.x.x</code>.</span></label>
+</div>
+<div class="note tip"><div class="ni">💡</div><div>If it won't connect: double-check upper/lower case in the password, make sure it isn't a guest network with a login page, move closer to the router, or un-comment the <code>txpower</code> line — some Super Mini boards join more reliably at reduced power.</div></div>
+</section><section class="step" id="step6"><div class="shead"><div class="badge">6</div><div><h2>Create your free EMQX Cloud broker</h2><div class="meta">⏱ about 20 min</div></div></div>
+<p>This is the "post office". Menu names on websites change a little over time; if a button isn't where I say, look for the closest match.</p>
+<ol class="steps">
+<li>Go to <code>emqx.com</code> → <b>Cloud</b> → <b>Sign up</b> (email only).</li>
+<li>Click <b>New Deployment</b> and choose the <b>Serverless</b> plan. Pick the data-centre region closest to you and your niece.</li>
+<li><b>Confirm it is free before you click Create:</b> the page should show free monthly quotas (1 million session-minutes and 1 GB traffic as of when I checked) and the price as zero. <b>Do not add a credit card.</b> Leave the <i>spend limit</i> at 0: if you ever hit the free quota, EMQX pauses the deployment until next month instead of charging you.</li>
+<li>Open the deployment's <b>Overview</b> page and write down:
+  <ul><li><b>Connection address</b> (looks like <code>abcd1234.ala.emqxsl.com</code>)</li>
+  <li><b>MQTT over TLS port</b> (normally <b>8883</b>) and <b>WebSocket over TLS port</b> (normally <b>8084</b>)</li></ul></li>
+<li>Open <b>Access Control → Authentication</b> (sometimes "Client authentication") and add <b>three users</b>, each with its own password:
+<table><tr><th>Username</th><th>Used by</th></tr><tr><td><code>lumi</code></td><td>Lumi cube</td></tr><tr><td><code>bumi</code></td><td>Bumi cube</td></tr><tr><td><code>phone</code></td><td>The phone page</td></tr></table></li>
+<li><b>Invent your topic prefix</b>, e.g. <code>lumibumi/blue-otter-4821</code>. Make it unique to you. It's your private room name.</li>
+</ol>
+<div class="note info"><div class="ni">ℹ️</div><div><b>Will 2 cubes + a phone stay inside the free quota?</b> Two always-on cubes use roughly 2 × 43,200 = <b>86,400 session-minutes</b> a month — under 9% of the 1,000,000 free. Messages are tiny, so traffic is nowhere near 1 GB.</div></div>
+<h3>Write your details down</h3>
+<table>
+<tr><td>Broker address</td><td><i>________________________________</i></td></tr>
+<tr><td>Topic prefix</td><td><i>________________________________</i></td></tr>
+<tr><td>Passwords for lumi / bumi / phone</td><td><i>keep them in your password manager</i></td></tr>
+</table>
+<h3>Test with a desktop client (optional but recommended)</h3>
+<p>In MQTTX: <b>New connection</b> → Host = your address, Port = 8883, protocol <code>mqtts://</code>, user <code>phone</code> + its password, turn SSL/TLS on (if it complains about certificates, choose "CA signed server" or turn off "verify"). Subscribe to <code>lumibumi/test</code>, then publish a message to the same topic; you should see it arrive.</p>
+<div class="tests"><h4>✅ Test checklist <span class="hint">(tick each one before moving on)</span></h4>
+<label class="chk"><input type="checkbox" data-id="s6-0"><span>Deployment shows as <b>running</b> and is the free Serverless plan with no card on file.</span></label>
+<label class="chk"><input type="checkbox" data-id="s6-1"><span>You have the address, ports, 3 usernames/passwords and your topic prefix written down.</span></label>
+<label class="chk"><input type="checkbox" data-id="s6-2"><span>(Optional) MQTTX connected and a test message round-tripped.</span></label>
+</div>
+</section><section class="step" id="step7"><div class="shead"><div class="badge">7</div><div><h2>Make the cube talk to the cloud</h2><div class="meta">⏱ about 15 min</div></div></div>
+<p>Now prove the board can open a secure connection to EMQX. Run the Wi-Fi test (step 5) again so you're online, then run this. Fill in your own address and the <code>lumi</code> password.</p>
+<div class="code"><div class="ctitle">REPL</div><button class="copy" type="button">Copy</button><pre><code># Run the Wi-Fi test above FIRST (in the same Thonny session), then this:
+from umqtt.simple import MQTTClient
+import time
+
+HOST = &quot;xxxxxxxx.ala.emqxsl.com&quot;     # from your EMQX Overview page
+USER = &quot;lumi&quot;
+PASSWORD = &quot;the-password-you-made&quot;
+
+def make_client():
+    try:      # older MicroPython
+        return MQTTClient(&quot;lb-test&quot;, HOST, 8883, USER, PASSWORD, keepalive=60,
+                          ssl=True, ssl_params={&quot;server_hostname&quot;: HOST})
+    except TypeError:   # newer MicroPython
+        import ssl
+        ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+        ctx.verify_mode = ssl.CERT_NONE
+        return MQTTClient(&quot;lb-test&quot;, HOST, 8883, USER, PASSWORD, keepalive=60, ssl=ctx)
+
+def got(topic, msg):
+    print(&quot;GOT:&quot;, topic, msg)
+
+c = make_client()
+c.set_callback(got)
+c.connect()
+print(&quot;connected to EMQX!&quot;)
+c.subscribe(b&quot;lumibumi/test&quot;)
+c.publish(b&quot;lumibumi/test&quot;, b&quot;hello from the cube&quot;)
+time.sleep(1)
+c.check_msg()            # should print:  GOT: b&#x27;lumibumi/test&#x27; b&#x27;hello from the cube&#x27;
+c.disconnect()</code></pre></div>
+<div class="tests"><h4>✅ Test checklist <span class="hint">(tick each one before moving on)</span></h4>
+<label class="chk"><input type="checkbox" data-id="s7-0"><span><code>connected to EMQX!</code> is printed (no error).</span></label>
+<label class="chk"><input type="checkbox" data-id="s7-1"><span><code>GOT: b'lumibumi/test' b'hello from the cube'</code> is printed.</span></label>
+<label class="chk"><input type="checkbox" data-id="s7-2"><span>(If using MQTTX) it also saw the message when subscribed to <code>lumibumi/test</code>.</span></label>
+</div>
+<div class="note stop"><div class="ni">🛑</div><div><b>If this fails, stop here</b> — the full firmware depends on this working. Common causes: <code>MQTTException: 5</code> or <code>4</code> = wrong username/password; <code>OSError -2</code> or a timeout = wrong address or Wi-Fi down; an SSL error = tell me the exact text, since MicroPython versions differ in how they take the TLS settings.</div></div>
+</section><section class="step" id="step8"><div class="shead"><div class="badge">8</div><div><h2>Load the Lumi Bumi firmware onto cube #1</h2><div class="meta">⏱ about 20 min</div></div></div>
+<p>Three files make up the cube's brain. They're in <code>lumi-bumi/firmware/</code> and printed in full in the appendix.</p>
+<table>
+<tr><th>File</th><th>What it is</th><th>You edit it?</th></tr>
+<tr><td><code>ssd1306.py</code></td><td>Screen driver (already uploaded in step 2)</td><td>No</td></tr>
+<tr><td><code>config.py</code></td><td>Your settings: name, Wi-Fi, EMQX details, prefix, pins</td><td><b>Yes</b></td></tr>
+<tr><td><code>main.py</code></td><td>The program; starts by itself at power-up</td><td>No</td></tr>
+</table>
+<ol class="steps">
+<li>Open <code>config.py</code> in Thonny (File → Open → This computer) and set at least: <code>DEVICE_NAME = "lumi"</code>, <code>MQTT_HOST</code>, <code>MQTT_USER = "lumi"</code>, <code>MQTT_PASSWORD</code>, and <code>TOPIC_PREFIX</code>. Put your Wi-Fi in <code>WIFI_SSID</code>/<code>WIFI_PASSWORD</code> for now (or leave them blank to use the setup hotspot in step 11).</li>
+<li>Use <b>File → Save as… → MicroPython device</b> to save <code>config.py</code> to the board. Do the same for <code>main.py</code> <b>last</b>.</li>
+<li>Restart the board: press Thonny's red <b>Stop</b>, then the board's RST button (or just unplug/re-plug USB).</li>
+<li>Watch the screen: <i>Lumi Bumi → Joining WiFi → Connecting to the cloud</i>, then a rising jingle and the big word <b>LUMI</b> with a beating heart and <b>Bumi away</b>.</li>
+</ol>
+<div class="note tip"><div class="ni">💡</div><div>To work on the board again while <code>main.py</code> is running, press Thonny's red <b>Stop</b> button once or twice to get the <code>&gt;&gt;&gt;</code> prompt back. To stop it from auto-starting, delete or rename <code>main.py</code> on the board.</div></div>
+<h3>Test it with hand-made messages</h3>
+<p>In MQTTX (connected as <code>phone</code>), subscribe to <code>YOUR_PREFIX/status/lumi</code> and publish to <code>YOUR_PREFIX/to/lumi</code>:</p>
+<div class="code"><div class="ctitle">publish → YOUR_PREFIX/to/lumi</div><button class="copy" type="button">Copy</button><pre><code>{&quot;type&quot;:&quot;text&quot;,&quot;from&quot;:&quot;Test&quot;,&quot;text&quot;:&quot;Hello Lumi! This is a test.&quot;}</code></pre></div>
+<div class="code"><div class="ctitle">publish → YOUR_PREFIX/to/lumi</div><button class="copy" type="button">Copy</button><pre><code>{&quot;type&quot;:&quot;preset&quot;,&quot;from&quot;:&quot;Test&quot;,&quot;id&quot;:&quot;love&quot;}</code></pre></div>
+<div class="tests"><h4>✅ Test checklist <span class="hint">(tick each one before moving on)</span></h4>
+<label class="chk"><input type="checkbox" data-id="s8-0"><span>Screen shows the big <b>LUMI</b> idle face with a beating heart.</span></label>
+<label class="chk"><input type="checkbox" data-id="s8-1"><span>MQTTX sees <code>online</code> on <code>…/status/lumi</code> (it's a retained message, so it shows right after subscribing).</span></label>
+<label class="chk"><input type="checkbox" data-id="s8-2"><span>The text message appears on the OLED, wrapped nicely, with <b>From Test</b> at the top, and the buzzer plays a two-note chime.</span></label>
+<label class="chk"><input type="checkbox" data-id="s8-3"><span>The preset message shows a heart + <b>Love you!</b> and plays a longer rising jingle.</span></label>
+<label class="chk"><input type="checkbox" data-id="s8-4"><span>The board's small blue LED blinks while a message is unread (it stops when you press a button).</span></label>
+<label class="chk"><input type="checkbox" data-id="s8-5"><span>Press A: the screen says <b>Sent!</b> and MQTTX (subscribed to <code>YOUR_PREFIX/to/bumi</code>) sees a <code>hi</code> preset. Hold A for 1 s: you get <code>miss</code>. B = <code>love</code>, hold B = <code>night</code>.</span></label>
+<label class="chk"><input type="checkbox" data-id="s8-6"><span>Hold <b>both</b> buttons for about 1.5 s: it shows Sound OFF/ON (the first press after the screen sleeps only wakes it).</span></label>
+</div>
+</section><section class="step" id="step9"><div class="shead"><div class="badge">9</div><div><h2>The phone page: text, drawings and photos</h2><div class="meta">⏱ about 25 min</div></div></div>
+<p><code>lumi-bumi/phone/index.html</code> is a single file. It connects straight to EMQX from your browser, so there is no server of your own to run.</p>
+<h3>9a — try it on the Mac first</h3>
+<ol class="steps">
+<li>Double-click <code>phone/index.html</code> to open it in your browser.</li>
+<li>Open <b>Settings</b> and fill in: EMQX address, port <b>8084</b>, username <code>phone</code> + password, <b>My cube is = Lumi</b> (so it will send to Bumi by default; you can switch the "Send to" box to Lumi for testing), your topic prefix, and a name (what the cube shows as "From …"). Press <b>Save &amp; connect</b>.</li>
+<li>The status says <b>connected ✓</b> and the <b>Lumi</b> dot turns green (the cube is online).</li>
+</ol>
+<p>Then try each tab, sending to <b>Lumi</b>:</p>
+<table>
+<tr><th>Tab</th><th>What to do</th><th>What the cube shows</th></tr>
+<tr><td><b>Text</b></td><td>Type a message of 2–3 sentences</td><td>Wrapped text; long ones flip pages every 3.5 s</td></tr>
+<tr><td><b>Draw</b></td><td>Draw a smiley with your finger/mouse; try Eraser, size, Invert</td><td>Your drawing, pixel for pixel</td></tr>
+<tr><td><b>Photo</b></td><td>Pick a photo; try Dotty vs Solid, Brightness, Contrast, Fit</td><td>A black-and-white version of it (best with simple, high-contrast pictures)</td></tr>
+<tr><td><b>Quick</b></td><td>Pick Hi / Love / Miss / Night</td><td>Big icon + words</td></tr>
+</table>
+<h3>9b — put it online so phones can use it (free)</h3>
+<ol class="steps">
+<li>Create a free account at <code>github.com</code>, then <b>New repository</b> named e.g. <code>lumibumi</code> (public is fine — the page contains <b>no passwords</b>; each person types them in once).</li>
+<li><b>Add file → Upload files</b>, drop in <code>index.html</code> and commit.</li>
+<li><b>Settings → Pages →</b> Source: <i>Deploy from a branch</i>, branch <code>main</code>, folder <code>/ (root)</code>. After a minute the page shows the address <code>https://YOURNAME.github.io/lumibumi/</code>.</li>
+<li>On your phone open that address, fill in Settings once, then use the browser's <b>Add to Home Screen</b> so it looks like an app.</li>
+<li>For family: in Settings tap <b>Copy setup link</b> and send it to a trusted person; opening it fills in all the settings for them.</li>
+</ol>
+<div class="note warn"><div class="ni">⚠️</div><div>The setup link contains your <code>phone</code> password. Anyone with it can send to your cubes. If it leaks, change that user's password in the EMQX console.</div></div>
+<div class="note info"><div class="ni">ℹ️</div><div>The page loads a small MQTT library from the internet (jsDelivr) when it opens, so it needs a connection. Emoji can't show on the OLED (its font is plain ASCII) — they become <code>?</code>. That's what the Quick tab pictures are for.</div></div>
+<div class="tests"><h4>✅ Test checklist <span class="hint">(tick each one before moving on)</span></h4>
+<label class="chk"><input type="checkbox" data-id="s9-0"><span>The Settings line says <b>connected ✓</b> and the Lumi dot is green.</span></label>
+<label class="chk"><input type="checkbox" data-id="s9-1"><span>A typed message arrives on cube #1 with the chime.</span></label>
+<label class="chk"><input type="checkbox" data-id="s9-2"><span>A drawing arrives and looks like what you drew.</span></label>
+<label class="chk"><input type="checkbox" data-id="s9-3"><span>A photo arrives and is recognisable (try a face or a simple logo).</span></label>
+<label class="chk"><input type="checkbox" data-id="s9-4"><span>All four Quick messages show the right icon.</span></label>
+<label class="chk"><input type="checkbox" data-id="s9-5"><span>Unplug cube #1: the Lumi dot goes grey within a minute or so. Plug it back in: it goes green again.</span></label>
+<label class="chk"><input type="checkbox" data-id="s9-6"><span>(Optional) The phone version works over mobile data, not just home Wi-Fi.</span></label>
+</div>
+</section><section class="step" id="step10"><div class="shead"><div class="badge">10</div><div><h2>Build cube #2 and test both directions</h2><div class="meta">⏱ about 30 min</div></div></div>
+<p>Repeat steps 1–5 quickly for the second board (flash MicroPython, wire it up, run the little tests — they only take a minute each now). Then:</p>
+<ol class="steps">
+<li>Upload <code>ssd1306.py</code>, <code>config.py</code>, <code>main.py</code>.</li>
+<li>Edit <code>config.py</code> <b>on the second board</b>: <code>DEVICE_NAME = "bumi"</code>, <code>MQTT_USER = "bumi"</code> and <code>MQTT_PASSWORD</code> to match. <b>Keep the same <code>MQTT_HOST</code> and <code>TOPIC_PREFIX</code>.</b></li>
+<li>Power both cubes. After a few seconds each should say the other is <b>online</b> (not "away").</li>
+</ol>
+<div class="tests"><h4>✅ Test checklist <span class="hint">(tick each one before moving on)</span></h4>
+<label class="chk"><input type="checkbox" data-id="s10-0"><span>Cube Lumi shows <b>Bumi online</b> and Bumi shows <b>Lumi online</b>.</span></label>
+<label class="chk"><input type="checkbox" data-id="s10-1"><span>Press A on Lumi: Bumi chimes and shows a smiley + <b>Hi!</b> + <b>from Lumi</b>.</span></label>
+<label class="chk"><input type="checkbox" data-id="s10-2"><span>Press B on Bumi: Lumi chimes and shows a heart + <b>Love you!</b> + <b>from Bumi</b>.</span></label>
+<label class="chk"><input type="checkbox" data-id="s10-3"><span>Long-press (hold ~1 s) each button once; the other two messages (Miss you / Good night) arrive.</span></label>
+<label class="chk"><input type="checkbox" data-id="s10-4"><span>From the phone page, send text, a drawing and a photo to Bumi — it arrives.</span></label>
+<label class="chk"><input type="checkbox" data-id="s10-5"><span>Unplug Bumi, press A on Lumi (it should still say Sent!), then plug Bumi back in — the message shows up after reconnect (stored for a while by the broker).</span></label>
+<label class="chk"><input type="checkbox" data-id="s10-6"><span>Hold both buttons on one cube ~1.5 s: it goes silent; messages still show but with no sound.</span></label>
+<label class="chk"><input type="checkbox" data-id="s10-7"><span>Leave both cubes alone for 20+ minutes: the screens turn off by themselves; pressing a button wakes them, and an arriving message wakes them with a sound.</span></label>
+</div>
+</section><section class="step" id="step11"><div class="shead"><div class="badge">11</div><div><h2>Moving a cube to a different Wi-Fi (your niece's home)</h2><div class="meta">⏱ about 10 min</div></div></div>
+<p>You do <b>not</b> need to re-flash anything to change Wi-Fi.</p>
+<ol class="steps">
+<li>Unplug the cube. <b>Hold both buttons</b> while plugging it in (or boot a cube that has no Wi-Fi saved).</li>
+<li>The screen says <b>WiFi setup — Join WiFi: LumiBumi-Setup — Open 192.168.4.1</b>.</li>
+<li>On a phone, join the Wi-Fi called <b>LumiBumi-Setup</b> (no password). If the phone warns "no internet", choose <b>stay connected</b>, and turn off mobile data for a moment.</li>
+<li>In the phone browser type <code>http://192.168.4.1</code> (it must be <code>http</code>, not <code>https</code>). Pick the home Wi-Fi (2.4 GHz), type its password, tap <b>Save and restart</b>.</li>
+<li>The cube restarts, joins that Wi-Fi, and carries on exactly as before.</li>
+</ol>
+<div class="tests"><h4>✅ Test checklist <span class="hint">(tick each one before moving on)</span></h4>
+<label class="chk"><input type="checkbox" data-id="s11-0"><span>The setup hotspot appears and the form opens at 192.168.4.1.</span></label>
+<label class="chk"><input type="checkbox" data-id="s11-1"><span>After saving, the cube joins a different network than the one in <code>config.py</code>.</span></label>
+<label class="chk"><input type="checkbox" data-id="s11-2"><span>You've written the setup steps on a card to include in the parcel for your niece's family.</span></label>
+</div>
+<div class="note info"><div class="ni">ℹ️</div><div>The saved Wi-Fi lives in <code>wifi.json</code> on the board and takes priority over <code>config.py</code>. If the Wi-Fi is down at power-up, the cube keeps retrying (it does not wipe anything).</div></div>
+</section><section class="step" id="step12"><div class="shead"><div class="badge">12</div><div><h2>Put it all in the glass cube</h2><div class="meta">⏱ about 1–2 hours</div></div></div>
+<figure><svg viewBox="0 0 560 330" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,sans-serif" role="img" aria-label="Cube layout idea">
+<rect width="560" height="330" rx="14" fill="#f8fafc"/>
+<g transform="translate(70,50)">
+<polygon points="0,60 170,60 170,230 0,230" fill="#dbeafe" stroke="#60a5fa" stroke-width="2.5" opacity=".9"/>
+<polygon points="0,60 50,15 220,15 170,60" fill="#eff6ff" stroke="#60a5fa" stroke-width="2.5"/>
+<polygon points="170,60 220,15 220,185 170,230" fill="#bfdbfe" stroke="#60a5fa" stroke-width="2.5"/>
+<rect x="30" y="85" width="110" height="62" rx="4" fill="#020617" stroke="#38bdf8" stroke-width="2"/>
+<text x="85" y="123" text-anchor="middle" font-size="22" fill="#7dd3fc" font-family="monospace" font-weight="700">Hi! ♥</text>
+<circle cx="55" cy="195" r="11" fill="#f97316" stroke="#7c2d12" stroke-width="2"/><text x="55" y="199" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">A</text>
+<circle cx="115" cy="195" r="11" fill="#f97316" stroke="#7c2d12" stroke-width="2"/><text x="115" y="199" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">B</text>
+<path d="M85,230 C85,260 150,265 190,262" fill="none" stroke="#334155" stroke-width="5" stroke-linecap="round"/>
+<text x="196" y="266" font-size="12" fill="#334155">USB-C cable out the back/bottom</text>
+</g>
+<g font-size="13" fill="#0f172a">
+<text x="300" y="80" font-weight="700">Layout idea (hollow cube)</text>
+<text x="300" y="104">• OLED glued/taped to the inside of the front glass, screen facing out</text>
+<text x="300" y="124">• Buttons mounted on a small base plate, poking through</text>
+<text x="300" y="144">  holes or sitting just below the front face</text>
+<text x="300" y="164">• ESP32 + buzzer on the base plate, behind the OLED</text>
+<text x="300" y="184">• Cable leaves through a notch at the back of the base</text>
+<text x="300" y="214" font-weight="700">Solid glass cube?</text>
+<text x="300" y="234">Put the OLED under the cube and look down through the glass:</text>
+<text x="300" y="254">use clear tape / silicone to avoid an air gap. Test first!</text>
+</g></svg><figcaption>Suggested layout. Which of the two cases applies depends on your cube.</figcaption></figure>
+<div class="note info"><div class="ni">ℹ️</div><div>I don't know what kind of glass cube you have (hollow box with a lid, or solid crystal), so treat these as starting ideas and test before gluing anything.</div></div>
+<ul>
+<li><b>Do a dry run first</b>: tape everything in place and check the screen is readable through/against the glass from where you'll sit.</li>
+<li><b>Replace loose jumper wires</b> with soldered wires, or a perfboard, for the final build. Cover any bare joins with heat-shrink or tape — nothing metal should touch the other pins.</li>
+<li><b>Buttons</b>: mount them where a child's finger can find them. Differences by feel help (one nearer the front, or put a dab of coloured sticker on A).</li>
+<li><b>Buzzer</b>: sound is muffled in a sealed cube. Leave a small gap or hole, or mount the buzzer on a face that isn't glass.</li>
+<li><b>Heat/power</b>: the electronics draw very little (roughly the same as a night-light bulb at most), but give the cable a notch so the lid sits flat.</li>
+<li><b>Solid glass cube</b>: put the OLED under or behind the cube, press it flat with clear tape or a thin layer of clear silicone, and view through the glass. Expect the image to look a little softer.</li>
+</ul>
+<div class="tests"><h4>✅ Test checklist <span class="hint">(tick each one before moving on)</span></h4>
+<label class="chk"><input type="checkbox" data-id="s12-0"><span>The screen is readable from normal sitting distance.</span></label>
+<label class="chk"><input type="checkbox" data-id="s12-1"><span>Both buttons can be pressed without moving the cube much.</span></label>
+<label class="chk"><input type="checkbox" data-id="s12-2"><span>The buzzer is clearly audible from a metre away.</span></label>
+<label class="chk"><input type="checkbox" data-id="s12-3"><span>Nothing wobbles when you tilt the cube, and nothing gets warm after an hour.</span></label>
+</div>
+</section><section class="step" id="step13"><div class="shead"><div class="badge">13</div><div><h2>Final acceptance test</h2><div class="meta">⏱ about 15 min</div></div></div>
+<p>Do this with <b>both cubes in their final homes</b> (or at least on different Wi-Fi networks) before gifting.</p>
+<div class="tests"><h4>✅ Test checklist <span class="hint">(tick each one before moving on)</span></h4>
+<label class="chk"><input type="checkbox" data-id="s13-0"><span>Power-cycle each cube: it shows its name and says the other is <b>online</b> within about 30 s, with no help from a computer.</span></label>
+<label class="chk"><input type="checkbox" data-id="s13-1"><span>A button press on each cube arrives on the other (all 4 messages).</span></label>
+<label class="chk"><input type="checkbox" data-id="s13-2"><span>Text, a drawing and a photo from the phone page arrive on both cubes.</span></label>
+<label class="chk"><input type="checkbox" data-id="s13-3"><span>The sound plays on arrival, and can be muted/unmuted by holding both buttons.</span></label>
+<label class="chk"><input type="checkbox" data-id="s13-4"><span>A power cut at either end: after power returns, both cubes recover on their own.</span></label>
+<label class="chk"><input type="checkbox" data-id="s13-5"><span>Wi-Fi change works through the setup hotspot (step 11).</span></label>
+<label class="chk"><input type="checkbox" data-id="s13-6"><span>You've told your niece's family: how it works, that the buttons send quick messages, that holding both silences it, and what to do if the Wi-Fi changes.</span></label>
+</div>
+</section>
+<section class="step" id="trouble"><div class="shead"><div class="badge">?</div><div><h2>Troubleshooting</h2></div></div>
+<table><tr><th style="width:36%">Symptom</th><th>Try this</th></tr><tr><td>Thonny can't find the board / no port</td><td>Try another USB-C <b>data</b> cable. Enter bootloader mode (hold BOOT, tap RST, release BOOT) and retry the install. Make sure no other program (a serial monitor) has the port open.</td></tr><tr><td><code>i2c.scan()</code> prints <code>[]</code></td><td>Swap-check SDA/SCL, check VCC is on 3V3 and GND is really connected (a loose rail is the #1 cause). Wiggle each jumper. Some modules label the pins in a different order from the diagram.</td></tr><tr><td>Scan shows <code>[60]</code> but the screen stays blank</td><td>Re-run the OLED test. If your scan shows <code>[61]</code> (0x3D), create the display with <code>addr=0x3D</code>.</td></tr><tr><td>Image is shifted 2 pixels or looks garbled</td><td>Your module may use an SH1106 chip instead of SSD1306. Tell me and I'll swap the driver.</td></tr><tr><td>Screen is upside down</td><td>In <code>ssd1306.py</code> change <code>SET_SEG_REMAP | 0x01</code> to <code>SET_SEG_REMAP</code> and <code>SET_COM_OUT_DIR | 0x08</code> to <code>SET_COM_OUT_DIR</code>.</td></tr><tr><td>Buzzer silent</td><td>Check the three wires, try the 5V-pin trick in step 3, and check you have a <i>passive</i> module (it should be silent on steady power). Some modules have a jumper or are "low-level trigger" — tell me what's printed on yours.</td></tr><tr><td>Button reads 'pressed' all the time</td><td>The two legs you used are the pair joined inside the button. Rotate it 90° or use diagonal legs.</td></tr><tr><td>Wi-Fi won't connect</td><td>Is it the 2.4 GHz network? Password case? Try <code>WIFI_TXPOWER = 8.5</code> in <code>config.py</code>. Move the board closer to the router.</td></tr><tr><td><code>MQTTException: 4</code> or <code>5</code></td><td>Username or password wrong for that EMQX user, or the user wasn't created.</td></tr><tr><td>MQTT connect times out</td><td>Wrong <code>MQTT_HOST</code>, port not 8883, or the deployment is stopped/paused in the EMQX console.</td></tr><tr><td>Cube connects but receives nothing</td><td>The <code>TOPIC_PREFIX</code> differs between the cube and phone page (even one character), or you sent to the wrong cube name.</td></tr><tr><td>Messages arrive twice or in a burst after reconnecting</td><td>That's the broker handing over messages stored while the cube was offline (a feature). Harmless.</td></tr><tr><td>The Lumi/Bumi dot on the phone stays grey</td><td>The phone page needs the same prefix. Also the cube must be online and running <code>main.py</code>.</td></tr><tr><td>Cube keeps restarting</td><td>Look at Thonny's output for the error. Usually a typo in <code>config.py</code> (a missing quote).</td></tr><tr><td>Setup hotspot page won't open</td><td>Use <code>http://192.168.4.1</code> (not https), turn off mobile data, accept "stay connected" when the phone says there's no internet.</td></tr><tr><td>Everything worked, then stopped months later</td><td>Check the EMQX console: the free deployment may have been paused (quota or inactivity), or an account password changed.</td></tr></table></section>
+<section class="step" id="reference"><div class="shead"><div class="badge">#</div><div><h2>Reference</h2></div></div>
+<h3>Pin map (same on both cubes)</h3>
+<table>
+<tr><th>Function</th><th>GPIO</th><th>Notes</th></tr>
+<tr><td>OLED SDA</td><td>5</td><td>I²C data</td></tr>
+<tr><td>OLED SCL</td><td>6</td><td>I²C clock</td></tr>
+<tr><td>Buzzer signal</td><td>7</td><td>PWM tone</td></tr>
+<tr><td>Button A</td><td>3</td><td>to GND, internal pull-up</td></tr>
+<tr><td>Button B</td><td>4</td><td>to GND, internal pull-up</td></tr>
+<tr><td>Status LED</td><td>8</td><td>on-board, on when output = 0</td></tr>
+<tr><td>Avoid</td><td>2, 8, 9</td><td>boot "strapping" pins; 9 = BOOT button</td></tr>
+</table>
+<h3>Message formats (JSON)</h3>
+<p>Topics: <code>PREFIX/to/lumi</code>, <code>PREFIX/to/bumi</code> (messages), <code>PREFIX/status/lumi</code>, <code>PREFIX/status/bumi</code> (retained "online"/"offline").</p>
+<table>
+<tr><th>Type</th><th>Example</th></tr>
+<tr><td>Text (≤300 chars, ASCII)</td><td><code>{"type":"text","from":"Auntie","text":"Hi!"}</code></td></tr>
+<tr><td>Quick message</td><td><code>{"type":"preset","from":"Auntie","id":"love"}</code> — ids: hi, love, miss, night</td></tr>
+<tr><td>Image (128×64, 1 bit)</td><td><code>{"type":"img","from":"Auntie","data":"&lt;base64 of 1024 bytes&gt;"}</code></td></tr>
+</table>
+<p>The 1024 bytes are in the OLED's own layout: 8 rows of 128 columns, each byte holding 8 vertical pixels with the least significant bit on top. That's why the cube can copy it straight to the screen.</p>
+<h3>Security notes</h3>
+<ul>
+<li>The cubes connect over TLS (encrypted) but, to keep MicroPython simple, <b>don't verify the server's certificate</b>. That protects against eavesdropping but not a determined impersonator; fine for a family gadget.</li>
+<li>Wi-Fi passwords and MQTT passwords sit in plain text on the board's flash. Use unique passwords, never reuse your main ones.</li>
+<li>Anyone with the EMQX address, a valid user and your topic prefix can message the cubes. Keep the prefix secret and change a user's password if a link leaks.</li>
+<li>Rate: the buttons wait 2 s between sends to prevent flooding.</li>
+</ul>
+<h3>Ideas for later</h3>
+<ul><li>Sound themes per sender · quiet hours · more preset pictures · a "thinking of you" nightlight glow with an LED · a photo-of-the-day.</li></ul>
+</section>
+<section class="step" id="appendix"><div class="shead"><div class="badge">{}</div><div><h2>Code appendix</h2><div class="meta">The same files as in the lumi-bumi folder</div></div></div><details class="app"><summary>firmware/config.py — your settings</summary><div class="code"><button class="copy" type="button">Copy</button><pre><code># Lumi Bumi - settings. This is the ONLY file you normally need to edit.
+# Each cube gets its own copy: change DEVICE_NAME, MQTT_USER and MQTT_PASSWORD.
+
+# --- Who is this cube? -------------------------------------------------------
+DEVICE_NAME = &quot;lumi&quot;            # &quot;lumi&quot; or &quot;bumi&quot; (lower case)
+
+# --- Wi-Fi (2.4 GHz only) ----------------------------------------------------
+# Leave blank to use the setup hotspot instead (hold both buttons while
+# plugging in, or boot with no Wi-Fi saved). Whatever the hotspot saves wins.
+WIFI_SSID = &quot;&quot;
+WIFI_PASSWORD = &quot;&quot;
+WIFI_TXPOWER = None             # try 8.5 if the board struggles to join Wi-Fi
+
+# --- EMQX Cloud Serverless (copy from your EMQX console) ---------------------
+MQTT_HOST = &quot;xxxxxxxx.ala.emqxsl.com&quot;
+MQTT_PORT = 8883                # MQTT over TLS
+MQTT_USER = &quot;lumi&quot;              # one EMQX user per device
+MQTT_PASSWORD = &quot;change-me&quot;
+
+# Both cubes AND the phone page must use exactly the same prefix.
+# Make it long and random-ish; it works like a private room name.
+TOPIC_PREFIX = &quot;lumibumi/change-me-to-something-random&quot;
+
+# --- Pins (see the wiring diagram) --------------------------------------------
+PIN_SDA = 5
+PIN_SCL = 6
+PIN_BUZZER = 7
+PIN_BTN_A = 3
+PIN_BTN_B = 4
+
+# --- Quick-send messages: short press / long press (hold ~1 second) ----------
+# Choose from: &quot;hi&quot;, &quot;love&quot;, &quot;miss&quot;, &quot;night&quot;
+PRESET_A = &quot;hi&quot;
+PRESET_A_LONG = &quot;miss&quot;
+PRESET_B = &quot;love&quot;
+PRESET_B_LONG = &quot;night&quot;
+
+# --- Behaviour ----------------------------------------------------------------
+SOUND_ON = True                 # hold both buttons ~1.5 s to mute/unmute
+SEND_COOLDOWN_MS = 2000         # minimum gap between two button sends
+PAGE_MS = 3500                  # how long each page of a long message shows
+MSG_HOLD_MS = 5 * 60 * 1000     # show a message this long, then back to idle
+SLEEP_AFTER_MS = 15 * 60 * 1000 # turn the screen off after this much quiet</code></pre></div></details>
+<details class="app"><summary>firmware/main.py — the cube program</summary><div class="code"><button class="copy" type="button">Copy</button><pre><code># Lumi Bumi - main.py
+# Runs automatically every time the board gets power.
+#
+# What it does
+#   * joins Wi-Fi (or opens a setup hotspot if it has no Wi-Fi to join)
+#   * keeps a secure MQTT connection to EMQX Cloud
+#   * shows messages from the other cube / phone page on the OLED and beeps
+#   * two buttons send quick messages (short press and long press = 4 messages)
+
+import binascii
+import gc
+import json
+import machine
+import network
+import socket
+import sys
+import time
+import framebuf
+from machine import Pin, I2C, PWM
+from umqtt.simple import MQTTClient
+
+import config
+import ssd1306
+
+# ---------------------------------------------------------------- identity ---
+NAME = config.DEVICE_NAME.lower()
+if NAME not in (&quot;lumi&quot;, &quot;bumi&quot;):
+    raise ValueError(&quot;DEVICE_NAME in config.py must be &#x27;lumi&#x27; or &#x27;bumi&#x27;&quot;)
+PEER = &quot;bumi&quot; if NAME == &quot;lumi&quot; else &quot;lumi&quot;
+
+T_IN = config.TOPIC_PREFIX + &quot;/to/&quot; + NAME              # messages for me
+T_OUT = config.TOPIC_PREFIX + &quot;/to/&quot; + PEER             # messages for the other cube
+T_STATUS = config.TOPIC_PREFIX + &quot;/status/&quot; + NAME      # &quot;online&quot; / &quot;offline&quot;
+T_PEER_STATUS = config.TOPIC_PREFIX + &quot;/status/&quot; + PEER
+
+ticks_ms = time.ticks_ms
+ticks_diff = time.ticks_diff
+ticks_add = time.ticks_add
+
+# ---------------------------------------------------------------- hardware ---
+i2c = I2C(0, sda=Pin(config.PIN_SDA), scl=Pin(config.PIN_SCL), freq=400000)
+oled = ssd1306.SSD1306_I2C(128, 64, i2c)
+buz = PWM(Pin(config.PIN_BUZZER), freq=1000, duty_u16=0)
+buttons = [Pin(config.PIN_BTN_A, Pin.IN, Pin.PULL_UP),
+           Pin(config.PIN_BTN_B, Pin.IN, Pin.PULL_UP)]
+led = Pin(8, Pin.OUT, value=1)          # on-board LED, 0 = on
+wlan = network.WLAN(network.STA_IF)
+
+# ------------------------------------------------------------------- sound ---
+muted = not config.SOUND_ON
+
+MELODY_TEXT = ((880, 80), (1175, 140))
+MELODY_PRESET = ((784, 80), (988, 80), (1175, 80), (1568, 220))
+MELODY_IMAGE = ((660, 80), (880, 80), (1319, 180))
+MELODY_SENT = ((1047, 70), (1568, 90))
+MELODY_ERR = ((300, 200), (200, 300))
+MELODY_ONLINE = ((523, 70), (659, 70), (784, 70), (1047, 120))
+
+
+def tone(freq, ms):
+    if freq:
+        buz.freq(freq)
+        buz.duty_u16(32768)
+    time.sleep_ms(ms)
+    buz.duty_u16(0)
+
+
+def play(notes):
+    if muted:
+        return
+    for freq, ms in notes:
+        tone(freq, ms)
+        time.sleep_ms(30)
+
+
+# ----------------------------------------------------------------- drawing ---
+# 8x8 pixel pictures for the quick messages (one byte per row).
+ICONS = {
+    &quot;smile&quot;: (0x3C, 0x42, 0xA5, 0x81, 0xA5, 0x99, 0x42, 0x3C),
+    &quot;heart&quot;: (0x66, 0xFF, 0xFF, 0xFF, 0x7E, 0x3C, 0x18, 0x00),
+    &quot;star&quot;: (0x18, 0x18, 0xFF, 0x7E, 0x3C, 0x7E, 0x66, 0x00),
+    &quot;moon&quot;: (0x38, 0x70, 0xE0, 0xE0, 0xE0, 0x70, 0x38, 0x00),
+}
+PRESETS = {
+    &quot;hi&quot;: (&quot;smile&quot;, &quot;Hi!&quot;),
+    &quot;love&quot;: (&quot;heart&quot;, &quot;Love you!&quot;),
+    &quot;miss&quot;: (&quot;star&quot;, &quot;Miss you!&quot;),
+    &quot;night&quot;: (&quot;moon&quot;, &quot;Good night!&quot;),
+}
+
+
+def clean(s):
+    &quot;&quot;&quot;The OLED font only has plain ASCII, so swap anything else for &#x27;?&#x27;.&quot;&quot;&quot;
+    return &quot;&quot;.join(c if (32 &lt;= ord(c) &lt; 127 or c == &quot;\n&quot;) else &quot;?&quot; for c in s)
+
+
+def wrap(text, width=16):
+    lines = []
+    for para in text.split(&quot;\n&quot;):
+        line = &quot;&quot;
+        for word in para.split(&quot; &quot;):
+            while len(word) &gt; width:
+                if line:
+                    lines.append(line)
+                    line = &quot;&quot;
+                lines.append(word[:width])
+                word = word[width:]
+            if not line:
+                line = word
+            elif len(line) + 1 + len(word) &lt;= width:
+                line += &quot; &quot; + word
+            else:
+                lines.append(line)
+                line = word
+        lines.append(line)
+    return lines
+
+
+def draw_icon(name, x, y, s):
+    for r, row in enumerate(ICONS[name]):
+        for c in range(8):
+            if row &amp; (0x80 &gt;&gt; c):
+                oled.fill_rect(x + c * s, y + r * s, s, s, 1)
+
+
+def draw_big(text, y, s):
+    w = len(text) * 8
+    fb = framebuf.FrameBuffer(bytearray(w), w, 8, framebuf.MONO_VLSB)
+    fb.text(text, 0, 0, 1)
+    x0 = (128 - w * s) // 2
+    for x in range(w):
+        for r in range(8):
+            if fb.pixel(x, r):
+                oled.fill_rect(x0 + x * s, y + r * s, s, s, 1)
+
+
+def center(text, y):
+    oled.text(text, (128 - 8 * len(text)) // 2, y)
+
+
+def status(*lines):
+    &quot;&quot;&quot;Show a few centred lines (used for &#x27;connecting...&#x27; style screens).&quot;&quot;&quot;
+    oled.fill(0)
+    y = (64 - (12 * len(lines) - 4)) // 2
+    for line in lines:
+        center(line[:16], y)
+        y += 12
+    oled.show()
+
+
+def flash(*lines):
+    status(*lines)
+    time.sleep_ms(900)
+    redraw()
+
+
+# ------------------------------------------------------------------- views ---
+view = {&quot;kind&quot;: &quot;idle&quot;}
+view_since = 0
+beat = False
+last_beat = 0
+peer_online = False
+asleep = False
+last_activity = 0
+unread = False
+link_bad = False
+last_send = ticks_add(ticks_ms(), -10000)
+inbox = []
+
+
+def draw_idle():
+    draw_big(NAME.upper(), 4, 3)
+    s = 2 if beat else 1
+    draw_icon(&quot;heart&quot;, 64 - 4 * s, 42 - 4 * s, s)
+    center(PEER.capitalize() + (&quot; online&quot; if peer_online else &quot; away&quot;), 55)
+    if muted:
+        oled.text(&quot;x&quot;, 120, 0)
+
+
+def draw_text():
+    oled.text(&quot;From &quot; + view[&quot;sender&quot;], 0, 0)
+    oled.hline(0, 9, 128, 1)
+    pages = view[&quot;pages&quot;]
+    for n, line in enumerate(pages[view[&quot;i&quot;]]):
+        oled.text(line, 0, 12 + n * 8)
+    if len(pages) &gt; 1:
+        oled.text(&quot;%d/%d&quot; % (view[&quot;i&quot;] + 1, len(pages)), 0, 56)
+
+
+def draw_preset():
+    icon, label = PRESETS[view[&quot;id&quot;]]
+    draw_icon(icon, 48, 2, 4)
+    center(label, 40)
+    center(&quot;from &quot; + view[&quot;sender&quot;], 54)
+
+
+def redraw():
+    oled.fill(0)
+    kind = view[&quot;kind&quot;]
+    if kind == &quot;idle&quot;:
+        draw_idle()
+    elif kind == &quot;text&quot;:
+        draw_text()
+    elif kind == &quot;preset&quot;:
+        draw_preset()
+    elif kind == &quot;image&quot;:
+        oled.buffer[:] = view[&quot;data&quot;]
+    oled.show()
+
+
+def set_view(**kw):
+    global view, view_since
+    view = kw
+    view_since = ticks_ms()
+    redraw()
+
+
+def wake():
+    &quot;&quot;&quot;Mark activity. Returns True if the screen had been asleep.&quot;&quot;&quot;
+    global asleep, last_activity
+    last_activity = ticks_ms()
+    if asleep:
+        oled.poweron()
+        asleep = False
+        return True
+    return False
+
+
+# ------------------------------------------------------------ Wi-Fi + portal ---
+def load_wifi():
+    try:
+        with open(&quot;wifi.json&quot;) as f:
+            d = json.load(f)
+        return d[&quot;ssid&quot;], d[&quot;password&quot;]
+    except (OSError, ValueError, KeyError):
+        return config.WIFI_SSID, config.WIFI_PASSWORD
+
+
+def wifi_connect(ssid, password, timeout_s=20):
+    wlan.active(True)
+    txp = getattr(config, &quot;WIFI_TXPOWER&quot;, None)
+    if txp:
+        wlan.config(txpower=txp)
+    wlan.connect(ssid, password)
+    t0 = ticks_ms()
+    while not wlan.isconnected():
+        if ticks_diff(ticks_ms(), t0) &gt; timeout_s * 1000:
+            return False
+        time.sleep_ms(200)
+    return True
+
+
+def unquote(s):
+    b = s.replace(&quot;+&quot;, &quot; &quot;).encode()
+    out = bytearray()
+    i = 0
+    while i &lt; len(b):
+        if b[i] == 37 and i + 2 &lt; len(b):
+            try:
+                out.append(int(b[i + 1:i + 3].decode(), 16))
+                i += 3
+                continue
+            except ValueError:
+                pass
+        out.append(b[i])
+        i += 1
+    return out.decode()
+
+
+def esc(s):
+    return s.replace(&quot;&amp;&quot;, &quot;&amp;amp;&quot;).replace(&quot;&lt;&quot;, &quot;&amp;lt;&quot;).replace(&#x27;&quot;&#x27;, &quot;&amp;quot;&quot;)
+
+
+PORTAL_HTML = &quot;&quot;&quot;&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;head&gt;
+&lt;meta name=viewport content=&quot;width=device-width,initial-scale=1&quot;&gt;&lt;title&gt;@NAME@ WiFi&lt;/title&gt;
+&lt;style&gt;body{font-family:sans-serif;max-width:380px;margin:24px auto;padding:0 14px}
+input,button{width:100%;font-size:18px;padding:12px;margin:6px 0;box-sizing:border-box}
+button{background:#2563eb;color:#fff;border:0;border-radius:8px}&lt;/style&gt;&lt;/head&gt;&lt;body&gt;
+&lt;h2&gt;@NAME@ WiFi setup&lt;/h2&gt;
+&lt;form method=POST action=/save&gt;
+&lt;label&gt;WiFi name (2.4 GHz only)&lt;/label&gt;
+&lt;input name=ssid list=nets required autocapitalize=off autocorrect=off&gt;
+&lt;datalist id=nets&gt;@NETS@&lt;/datalist&gt;
+&lt;label&gt;WiFi password&lt;/label&gt;
+&lt;input name=pw type=password&gt;
+&lt;button&gt;Save and restart&lt;/button&gt;
+&lt;/form&gt;&lt;/body&gt;&lt;/html&gt;&quot;&quot;&quot;
+
+
+def read_request(cl):
+    data = b&quot;&quot;
+    while b&quot;\r\n\r\n&quot; not in data:
+        chunk = cl.recv(512)
+        if not chunk:
+            break
+        data += chunk
+    head, _, body = data.partition(b&quot;\r\n\r\n&quot;)
+    need = 0
+    for line in head.split(b&quot;\r\n&quot;):
+        if line.lower().startswith(b&quot;content-length:&quot;):
+            need = int(line.split(b&quot;:&quot;)[1])
+    while len(body) &lt; need:
+        chunk = cl.recv(512)
+        if not chunk:
+            break
+        body += chunk
+    return head, body
+
+
+def portal():
+    &quot;&quot;&quot;Open a hotspot + tiny web page so Wi-Fi details can be typed on a phone.&quot;&quot;&quot;
+    ssids = []
+    try:
+        wlan.active(True)
+        for r in wlan.scan():
+            n = r[0].decode(&quot;utf-8&quot;, &quot;ignore&quot;)
+            if n and n not in ssids:
+                ssids.append(n)
+    except Exception as e:
+        print(&quot;scan failed:&quot;, e)
+    nets = &quot;&quot;.join(&#x27;&lt;option value=&quot;%s&quot;&gt;&#x27; % esc(n) for n in ssids[:15])
+
+    ap_name = &quot;LumiBumi-Setup&quot;
+    ap = network.WLAN(network.AP_IF)
+    ap.active(True)
+    try:
+        ap.config(essid=ap_name, security=0)
+    except Exception:
+        ap.config(essid=ap_name, authmode=0)
+    status(&quot;WiFi setup&quot;, &quot;Join WiFi:&quot;, ap_name, &quot;Open 192.168.4.1&quot;)
+
+    srv = socket.socket()
+    srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    srv.bind((&quot;0.0.0.0&quot;, 80))
+    srv.listen(2)
+    page = PORTAL_HTML.replace(&quot;@NAME@&quot;, NAME.capitalize()).replace(&quot;@NETS@&quot;, nets)
+    while True:
+        cl, _ = srv.accept()
+        try:
+            head, body = read_request(cl)
+            if head.startswith(b&quot;POST /save&quot;):
+                form = {}
+                for pair in body.decode().split(&quot;&amp;&quot;):
+                    k, _, v = pair.partition(&quot;=&quot;)
+                    form[k] = unquote(v)
+                with open(&quot;wifi.json&quot;, &quot;w&quot;) as f:
+                    json.dump({&quot;ssid&quot;: form.get(&quot;ssid&quot;, &quot;&quot;), &quot;password&quot;: form.get(&quot;pw&quot;, &quot;&quot;)}, f)
+                cl.sendall(b&quot;HTTP/1.0 200 OK\r\nContent-Type: text/html\r\nConnection: close\r\n\r\n&quot;
+                           b&quot;&lt;h2&gt;Saved! Restarting...&lt;/h2&gt;&quot;)
+                cl.close()
+                status(&quot;Saved!&quot;, &quot;Restarting...&quot;)
+                time.sleep(1)
+                machine.reset()
+            cl.sendall(b&quot;HTTP/1.0 200 OK\r\nContent-Type: text/html\r\nConnection: close\r\n\r\n&quot;
+                       + page.encode())
+        except Exception as e:
+            print(&quot;portal error:&quot;, e)
+        finally:
+            try:
+                cl.close()
+            except Exception:
+                pass
+
+
+# -------------------------------------------------------------------- MQTT ---
+client = None
+
+
+def make_client():
+    cid = &quot;lumibumi-&quot; + NAME
+    args = dict(user=config.MQTT_USER, password=config.MQTT_PASSWORD, keepalive=60)
+    try:
+        # older MicroPython: ssl=True plus ssl_params
+        return MQTTClient(cid, config.MQTT_HOST, config.MQTT_PORT, ssl=True,
+                          ssl_params={&quot;server_hostname&quot;: config.MQTT_HOST}, **args)
+    except TypeError:
+        # newer MicroPython: pass an SSLContext
+        import ssl
+        ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+        ctx.verify_mode = ssl.CERT_NONE   # encrypted, but server identity not checked
+        return MQTTClient(cid, config.MQTT_HOST, config.MQTT_PORT, ssl=ctx, **args)
+
+
+def on_message(topic, msg):
+    global peer_online
+    if topic.decode() == T_PEER_STATUS:
+        peer_online = (msg == b&quot;online&quot;)
+        return
+    if len(inbox) &lt; 5:
+        inbox.append(msg)
+
+
+def connect_all():
+    &quot;&quot;&quot;Block until Wi-Fi and MQTT are both up. Retries forever.&quot;&quot;&quot;
+    global client, link_bad
+    if client:
+        try:
+            client.sock.close()
+        except Exception:
+            pass
+        client = None
+    ssid, password = load_wifi()
+    while True:
+        if not wlan.isconnected():
+            status(&quot;Joining WiFi&quot;, ssid[:16])
+            if not wifi_connect(ssid, password):
+                status(&quot;WiFi not found&quot;, &quot;retrying...&quot;)
+                time.sleep(5)
+                continue
+        status(&quot;Connecting&quot;, &quot;to the cloud&quot;)
+        try:
+            c = make_client()
+            c.set_callback(on_message)
+            c.set_last_will(T_STATUS, b&quot;offline&quot;, retain=True)
+            c.connect(clean_session=False)
+            c.subscribe(T_IN, qos=1)
+            c.subscribe(T_PEER_STATUS)
+            c.publish(T_STATUS, b&quot;online&quot;, retain=True)
+            client = c
+            link_bad = False
+            return
+        except Exception as e:
+            print(&quot;cloud connect failed:&quot;, e)
+            status(&quot;Cloud failed&quot;, &quot;retrying...&quot;)
+            time.sleep(5)
+
+
+# ---------------------------------------------------------------- messages ---
+def handle_inbox():
+    global unread
+    while inbox:
+        raw = inbox.pop(0)
+        try:
+            m = json.loads(raw)
+            kind = m.get(&quot;type&quot;)
+            sender = clean(str(m.get(&quot;from&quot;, PEER.capitalize())))[:11] or PEER.capitalize()
+            if kind == &quot;text&quot;:
+                text = clean(str(m.get(&quot;text&quot;, &quot;&quot;)))[:300]
+                if not text.strip():
+                    continue
+                lines = wrap(text)
+                pages = [lines[i:i + 5] for i in range(0, len(lines), 5)]
+                wake()
+                set_view(kind=&quot;text&quot;, sender=sender, pages=pages, i=0,
+                         flip=ticks_add(ticks_ms(), config.PAGE_MS))
+                play(MELODY_TEXT)
+            elif kind == &quot;preset&quot;:
+                pid = m.get(&quot;id&quot;)
+                if pid not in PRESETS:
+                    continue
+                wake()
+                set_view(kind=&quot;preset&quot;, id=pid, sender=sender)
+                play(MELODY_PRESET)
+            elif kind == &quot;img&quot;:
+                data = binascii.a2b_base64(m[&quot;data&quot;])
+                if len(data) != 1024:
+                    continue
+                wake()
+                set_view(kind=&quot;image&quot;, data=data)
+                play(MELODY_IMAGE)
+            else:
+                continue
+            unread = True
+        except Exception as e:
+            print(&quot;bad message:&quot;, e)
+        gc.collect()
+
+
+def send_preset(pid):
+    global last_send, link_bad
+    now = ticks_ms()
+    if ticks_diff(now, last_send) &lt; config.SEND_COOLDOWN_MS:
+        return
+    last_send = now
+    msg = json.dumps({&quot;type&quot;: &quot;preset&quot;, &quot;id&quot;: pid, &quot;from&quot;: NAME.capitalize()})
+    try:
+        client.publish(T_OUT, msg, qos=1)
+    except Exception as e:
+        print(&quot;send failed:&quot;, e)
+        link_bad = True
+        flash(&quot;Not sent :(&quot;, &quot;no connection&quot;)
+        play(MELODY_ERR)
+        return
+    flash(&quot;Sent!&quot;, PRESETS[pid][1])
+    play(MELODY_SENT)
+
+
+def toggle_mute():
+    global muted
+    muted = not muted
+    flash(&quot;Sound&quot;, &quot;OFF&quot; if muted else &quot;ON&quot;)
+    if not muted:
+        tone(1047, 80)
+
+
+# ----------------------------------------------------------------- buttons ---
+held = [None, None]
+both_since = None
+swallow = False
+
+
+def poll_buttons():
+    &quot;&quot;&quot;Short press = preset, long press (~1 s) = second preset, both held = mute.&quot;&quot;&quot;
+    global both_since, swallow, unread
+    now = ticks_ms()
+    down = [buttons[0].value() == 0, buttons[1].value() == 0]
+
+    if down[0] and down[1]:
+        if both_since is None:
+            both_since = now
+        elif not swallow and ticks_diff(now, both_since) &gt; 1500:
+            swallow = True
+            wake()
+            toggle_mute()
+        for i in (0, 1):
+            if held[i] is None:
+                held[i] = now
+        return
+    both_since = None
+
+    for i in (0, 1):
+        if down[i]:
+            if held[i] is None:
+                held[i] = now
+        elif held[i] is not None:
+            dur = ticks_diff(now, held[i])
+            held[i] = None
+            if swallow or dur &lt; 40:
+                continue
+            if wake():          # first press only wakes the screen
+                continue
+            unread = False
+            long_press = dur &gt;= 800
+            if i == 0:
+                send_preset(config.PRESET_A_LONG if long_press else config.PRESET_A)
+            else:
+                send_preset(config.PRESET_B_LONG if long_press else config.PRESET_B)
+    if not down[0] and not down[1]:
+        swallow = False
+
+
+# --------------------------------------------------------------- main loop ---
+def housekeeping(now):
+    global beat, last_beat, unread, asleep
+    kind = view[&quot;kind&quot;]
+    if asleep:
+        return
+    if kind == &quot;text&quot; and len(view[&quot;pages&quot;]) &gt; 1 and ticks_diff(now, view[&quot;flip&quot;]) &gt;= 0:
+        view[&quot;i&quot;] = (view[&quot;i&quot;] + 1) % len(view[&quot;pages&quot;])
+        view[&quot;flip&quot;] = ticks_add(now, config.PAGE_MS)
+        redraw()
+    elif kind == &quot;idle&quot;:
+        if ticks_diff(now, last_beat) &gt; 1000:
+            beat = not beat
+            last_beat = now
+            redraw()
+    elif ticks_diff(now, view_since) &gt; config.MSG_HOLD_MS:
+        unread = False
+        set_view(kind=&quot;idle&quot;)
+    if ticks_diff(now, last_activity) &gt; config.SLEEP_AFTER_MS:
+        oled.poweroff()
+        asleep = True
+
+
+def main():
+    global peer_online, last_activity
+    status(&quot;Lumi Bumi&quot;, NAME.capitalize() + &quot; cube&quot;)
+    time.sleep_ms(1500)
+
+    setup_wanted = buttons[0].value() == 0 and buttons[1].value() == 0
+    ssid, _ = load_wifi()
+    if setup_wanted or not ssid:
+        portal()                                  # never returns
+
+    connect_all()
+    play(MELODY_ONLINE)
+    last_activity = ticks_ms()
+    set_view(kind=&quot;idle&quot;)
+    last_ping = ticks_ms()
+
+    while True:
+        now = ticks_ms()
+        try:
+            if link_bad:
+                raise OSError(&quot;link marked bad&quot;)
+            client.check_msg()
+            if ticks_diff(now, last_ping) &gt; 30000:
+                client.ping()
+                last_ping = now
+        except Exception as e:
+            print(&quot;link lost:&quot;, e)
+            peer_online = False
+            connect_all()
+            last_ping = ticks_ms()
+            redraw()
+            continue
+
+        poll_buttons()
+        handle_inbox()
+        housekeeping(now)
+        led.value(0 if (unread and (now // 500) % 2 == 0) else 1)
+        time.sleep_ms(20)
+
+
+try:
+    main()
+except Exception as e:
+    sys.print_exception(e)
+    try:
+        status(&quot;Oops!&quot;, &quot;Restarting...&quot;)
+    except Exception:
+        pass
+    time.sleep(10)
+    machine.reset()</code></pre></div></details>
+<details class="app"><summary>firmware/ssd1306.py — OLED driver</summary><div class="code"><button class="copy" type="button">Copy</button><pre><code># MicroPython SSD1306 OLED driver, I2C interface (from the official MicroPython drivers).
+from micropython import const
+import framebuf
+
+SET_CONTRAST = const(0x81)
+SET_ENTIRE_ON = const(0xA4)
+SET_NORM_INV = const(0xA6)
+SET_DISP = const(0xAE)
+SET_MEM_ADDR = const(0x20)
+SET_COL_ADDR = const(0x21)
+SET_PAGE_ADDR = const(0x22)
+SET_DISP_START_LINE = const(0x40)
+SET_SEG_REMAP = const(0xA0)
+SET_MUX_RATIO = const(0xA8)
+SET_IREF_SELECT = const(0xAD)
+SET_COM_OUT_DIR = const(0xC0)
+SET_DISP_OFFSET = const(0xD3)
+SET_COM_PIN_CFG = const(0xDA)
+SET_DISP_CLK_DIV = const(0xD5)
+SET_PRECHARGE = const(0xD9)
+SET_VCOM_DESEL = const(0xDB)
+SET_CHARGE_PUMP = const(0x8D)
+
+
+class SSD1306(framebuf.FrameBuffer):
+    def __init__(self, width, height, external_vcc):
+        self.width = width
+        self.height = height
+        self.external_vcc = external_vcc
+        self.pages = self.height // 8
+        self.buffer = bytearray(self.pages * self.width)
+        super().__init__(self.buffer, self.width, self.height, framebuf.MONO_VLSB)
+        self.init_display()
+
+    def init_display(self):
+        for cmd in (
+            SET_DISP,  # display off
+            SET_MEM_ADDR, 0x00,  # horizontal addressing
+            SET_DISP_START_LINE,
+            SET_SEG_REMAP | 0x01,  # column 127 mapped to SEG0
+            SET_MUX_RATIO, self.height - 1,
+            SET_COM_OUT_DIR | 0x08,  # scan from COM[N] to COM0
+            SET_DISP_OFFSET, 0x00,
+            SET_COM_PIN_CFG, 0x02 if self.width &gt; 2 * self.height else 0x12,
+            SET_DISP_CLK_DIV, 0x80,
+            SET_PRECHARGE, 0x22 if self.external_vcc else 0xF1,
+            SET_VCOM_DESEL, 0x30,  # 0.83 * Vcc
+            SET_CONTRAST, 0xFF,  # maximum
+            SET_ENTIRE_ON,  # output follows RAM contents
+            SET_NORM_INV,  # not inverted
+            SET_IREF_SELECT, 0x30,  # enable internal IREF during display on
+            SET_CHARGE_PUMP, 0x10 if self.external_vcc else 0x14,
+            SET_DISP | 0x01,  # display on
+        ):
+            self.write_cmd(cmd)
+        self.fill(0)
+        self.show()
+
+    def poweroff(self):
+        self.write_cmd(SET_DISP)
+
+    def poweron(self):
+        self.write_cmd(SET_DISP | 0x01)
+
+    def contrast(self, contrast):
+        self.write_cmd(SET_CONTRAST)
+        self.write_cmd(contrast)
+
+    def invert(self, invert):
+        self.write_cmd(SET_NORM_INV | (invert &amp; 1))
+
+    def show(self):
+        x0 = 0
+        x1 = self.width - 1
+        if self.width != 128:
+            # narrow displays use centred columns
+            col_offset = (128 - self.width) // 2
+            x0 += col_offset
+            x1 += col_offset
+        self.write_cmd(SET_COL_ADDR)
+        self.write_cmd(x0)
+        self.write_cmd(x1)
+        self.write_cmd(SET_PAGE_ADDR)
+        self.write_cmd(0)
+        self.write_cmd(self.pages - 1)
+        self.write_data(self.buffer)
+
+
+class SSD1306_I2C(SSD1306):
+    def __init__(self, width, height, i2c, addr=0x3C, external_vcc=False):
+        self.i2c = i2c
+        self.addr = addr
+        self.temp = bytearray(2)
+        self.write_list = [b&quot;\x40&quot;, None]  # Co=0, D/C#=1
+        super().__init__(width, height, external_vcc)
+
+    def write_cmd(self, cmd):
+        self.temp[0] = 0x80  # Co=1, D/C#=0
+        self.temp[1] = cmd
+        self.i2c.writeto(self.addr, self.temp)
+
+    def write_data(self, buf):
+        self.write_list[1] = buf
+        self.i2c.writevto(self.addr, self.write_list)</code></pre></div></details>
+<details class="app"><summary>phone/index.html — the phone page</summary><div class="code"><button class="copy" type="button">Copy</button><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover&quot;&gt;
+&lt;meta name=&quot;theme-color&quot; content=&quot;#0b1020&quot;&gt;
+&lt;title&gt;Lumi Bumi&lt;/title&gt;
+&lt;style&gt;
+  :root{
+    --bg:#0b1020; --card:#141b34; --card2:#1b2447; --ink:#eaf0ff; --mute:#8d9ac4;
+    --accent:#6ea8ff; --accent2:#ff7eb6; --ok:#3ddc97; --bad:#ff6b6b; --oled:#9fd4ff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1200px 600px at 50% -200px,#1d2a5c,var(--bg));color:var(--ink);
+    font:16px/1.4 -apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Roboto,sans-serif;min-height:100vh;
+    padding:env(safe-area-inset-top) 12px 40px}
+  main{max-width:560px;margin:0 auto}
+  header{display:flex;align-items:center;justify-content:space-between;padding:16px 4px 8px}
+  h1{margin:0;font-size:24px;letter-spacing:.5px}
+  h1 span{color:var(--accent2)}
+  .dots{display:flex;gap:10px;font-size:13px;color:var(--mute)}
+  .dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#44507c;margin-right:5px}
+  .dot.on{background:var(--ok);box-shadow:0 0 8px var(--ok)}
+  .card{background:var(--card);border:1px solid #232d57;border-radius:16px;padding:14px;margin:12px 0}
+  .tabs{display:flex;gap:6px;margin-bottom:12px}
+  .tab{flex:1;padding:10px 4px;border:0;border-radius:12px;background:var(--card2);color:var(--mute);font-size:15px;cursor:pointer}
+  .tab.active{background:var(--accent);color:#06122b;font-weight:600}
+  .screenwrap{background:#000;border:6px solid #2a335f;border-radius:10px;aspect-ratio:2/1;position:relative;overflow:hidden}
+  canvas#screen{width:100%;height:100%;display:block;image-rendering:pixelated;touch-action:none;background:#000}
+  pre#textprev{margin:0;position:absolute;inset:0;padding:2.5% 3%;color:var(--oled);font:600 clamp(9px,3.2vw,18px)/1.25 ui-monospace,Menlo,Consolas,monospace;
+    white-space:pre;overflow:hidden;display:none}
+  label{display:block;font-size:13px;color:var(--mute);margin:10px 0 4px}
+  input,select,textarea{width:100%;background:#0e1430;color:var(--ink);border:1px solid #2c3869;border-radius:10px;padding:10px;font-size:16px}
+  textarea{resize:vertical;min-height:84px}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .row&gt;*{flex:1}
+  button.btn{border:0;border-radius:12px;padding:12px 14px;font-size:16px;cursor:pointer;background:var(--card2);color:var(--ink)}
+  button.btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#06122b;font-weight:700;font-size:18px}
+  button.btn.sel{outline:2px solid var(--accent)}
+  .hint{font-size:12px;color:var(--mute);margin-top:6px}
+  .quick{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .quick button{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px}
+  .quick canvas{width:64px;height:64px;image-rendering:pixelated;background:#000;border-radius:8px}
+  .pane{display:none}.pane.active{display:block}
+  details&gt;summary{cursor:pointer;color:var(--accent);padding:4px 0}
+  #log{list-style:none;margin:0;padding:0}
+  #log li{padding:8px 0;border-bottom:1px solid #232d57;font-size:14px}
+  #log li:last-child{border:0}
+  #log .who{color:var(--accent2);font-weight:600}
+  #log canvas{display:block;margin-top:6px;width:192px;height:96px;image-rendering:pixelated;background:#000;border-radius:6px}
+  #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#fff;color:#111;padding:10px 16px;border-radius:999px;
+    opacity:0;transition:.25s;pointer-events:none;font-weight:600;z-index:9}
+  #toast.show{opacity:1}
+  #conn{font-size:13px}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;main&gt;
+  &lt;header&gt;
+    &lt;h1&gt;Lumi &lt;span&gt;♥&lt;/span&gt; Bumi&lt;/h1&gt;
+    &lt;div class=&quot;dots&quot;&gt;
+      &lt;span&gt;&lt;i class=&quot;dot&quot; id=&quot;d-lumi&quot;&gt;&lt;/i&gt;Lumi&lt;/span&gt;
+      &lt;span&gt;&lt;i class=&quot;dot&quot; id=&quot;d-bumi&quot;&gt;&lt;/i&gt;Bumi&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/header&gt;
+
+  &lt;!-- ===== message composer ===== --&gt;
+  &lt;section class=&quot;card&quot;&gt;
+    &lt;div class=&quot;tabs&quot; id=&quot;tabs&quot;&gt;
+      &lt;button class=&quot;tab active&quot; data-m=&quot;text&quot;&gt;Text&lt;/button&gt;
+      &lt;button class=&quot;tab&quot; data-m=&quot;draw&quot;&gt;Draw&lt;/button&gt;
+      &lt;button class=&quot;tab&quot; data-m=&quot;photo&quot;&gt;Photo&lt;/button&gt;
+      &lt;button class=&quot;tab&quot; data-m=&quot;quick&quot;&gt;Quick&lt;/button&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;screenwrap&quot; id=&quot;screenwrap&quot;&gt;
+      &lt;canvas id=&quot;screen&quot; width=&quot;128&quot; height=&quot;64&quot;&gt;&lt;/canvas&gt;
+      &lt;pre id=&quot;textprev&quot;&gt;&lt;/pre&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;hint&quot; id=&quot;previewHint&quot;&gt;This is what the little screen will show.&lt;/div&gt;
+
+    &lt;div class=&quot;pane active&quot; id=&quot;p-text&quot;&gt;
+      &lt;label for=&quot;msg&quot;&gt;Message (plain letters, numbers and punctuation)&lt;/label&gt;
+      &lt;textarea id=&quot;msg&quot; maxlength=&quot;300&quot; placeholder=&quot;Hi sweetie! Thinking of you :)&quot;&gt;&lt;/textarea&gt;
+      &lt;div class=&quot;hint&quot;&gt;&lt;span id=&quot;count&quot;&gt;0&lt;/span&gt;/300 &amp;middot; &lt;span id=&quot;pages&quot;&gt;&lt;/span&gt;
+        &amp;middot; Emoji can&#x27;t be shown on the screen &amp;mdash; use the Quick tab for little pictures.&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;pane&quot; id=&quot;p-draw&quot;&gt;
+      &lt;div class=&quot;row&quot; style=&quot;margin-top:12px&quot;&gt;
+        &lt;button class=&quot;btn sel&quot; id=&quot;t-pen&quot;&gt;✏️ Pen&lt;/button&gt;
+        &lt;button class=&quot;btn&quot; id=&quot;t-erase&quot;&gt;🩹 Eraser&lt;/button&gt;
+        &lt;select id=&quot;brush&quot; aria-label=&quot;Brush size&quot; style=&quot;max-width:110px&quot;&gt;
+          &lt;option value=&quot;1&quot;&gt;Thin&lt;/option&gt;&lt;option value=&quot;2&quot; selected&gt;Medium&lt;/option&gt;&lt;option value=&quot;4&quot;&gt;Thick&lt;/option&gt;
+        &lt;/select&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;row&quot; style=&quot;margin-top:8px&quot;&gt;
+        &lt;button class=&quot;btn&quot; id=&quot;t-clear&quot;&gt;Clear&lt;/button&gt;
+        &lt;button class=&quot;btn&quot; id=&quot;t-invert&quot;&gt;Invert&lt;/button&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;hint&quot;&gt;Draw straight on the screen above with your finger.&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;pane&quot; id=&quot;p-photo&quot;&gt;
+      &lt;label for=&quot;file&quot;&gt;Pick a photo&lt;/label&gt;
+      &lt;input type=&quot;file&quot; id=&quot;file&quot; accept=&quot;image/*&quot;&gt;
+      &lt;div class=&quot;row&quot;&gt;
+        &lt;div&gt;&lt;label for=&quot;fit&quot;&gt;Fit&lt;/label&gt;
+          &lt;select id=&quot;fit&quot;&gt;&lt;option value=&quot;contain&quot;&gt;Whole photo&lt;/option&gt;&lt;option value=&quot;cover&quot;&gt;Fill screen&lt;/option&gt;&lt;option value=&quot;stretch&quot;&gt;Stretch&lt;/option&gt;&lt;/select&gt;&lt;/div&gt;
+        &lt;div&gt;&lt;label for=&quot;dither&quot;&gt;Style&lt;/label&gt;
+          &lt;select id=&quot;dither&quot;&gt;&lt;option value=&quot;fs&quot;&gt;Dotty (dithered)&lt;/option&gt;&lt;option value=&quot;th&quot;&gt;Solid (black/white)&lt;/option&gt;&lt;/select&gt;&lt;/div&gt;
+      &lt;/div&gt;
+      &lt;label for=&quot;bright&quot;&gt;Brightness&lt;/label&gt;
+      &lt;input type=&quot;range&quot; id=&quot;bright&quot; min=&quot;-100&quot; max=&quot;100&quot; value=&quot;0&quot;&gt;
+      &lt;label for=&quot;contrast&quot;&gt;Contrast&lt;/label&gt;
+      &lt;input type=&quot;range&quot; id=&quot;contrast&quot; min=&quot;50&quot; max=&quot;300&quot; value=&quot;120&quot;&gt;
+      &lt;label&gt;&lt;input type=&quot;checkbox&quot; id=&quot;pinv&quot; style=&quot;width:auto&quot;&gt; Invert (swap light and dark)&lt;/label&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;pane&quot; id=&quot;p-quick&quot;&gt;
+      &lt;div class=&quot;quick&quot; id=&quot;quickgrid&quot; style=&quot;margin-top:12px&quot;&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;row&quot; style=&quot;margin-top:14px&quot;&gt;
+      &lt;div style=&quot;flex:0 0 38%&quot;&gt;
+        &lt;label for=&quot;target&quot; style=&quot;margin-top:0&quot;&gt;Send to&lt;/label&gt;
+        &lt;select id=&quot;target&quot;&gt;&lt;option value=&quot;lumi&quot;&gt;Lumi&lt;/option&gt;&lt;option value=&quot;bumi&quot;&gt;Bumi&lt;/option&gt;&lt;/select&gt;
+      &lt;/div&gt;
+      &lt;button class=&quot;btn primary&quot; id=&quot;send&quot; style=&quot;align-self:flex-end&quot;&gt;Send ✨&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;!-- ===== activity ===== --&gt;
+  &lt;section class=&quot;card&quot;&gt;
+    &lt;strong&gt;Activity&lt;/strong&gt;
+    &lt;ul id=&quot;log&quot;&gt;&lt;li style=&quot;color:var(--mute)&quot;&gt;Nothing yet.&lt;/li&gt;&lt;/ul&gt;
+  &lt;/section&gt;
+
+  &lt;!-- ===== settings ===== --&gt;
+  &lt;section class=&quot;card&quot;&gt;
+    &lt;details id=&quot;settings&quot;&gt;
+      &lt;summary&gt;Settings &lt;span id=&quot;conn&quot;&gt;&lt;/span&gt;&lt;/summary&gt;
+      &lt;label for=&quot;s-host&quot;&gt;EMQX address (no https://)&lt;/label&gt;
+      &lt;input id=&quot;s-host&quot; placeholder=&quot;xxxxxxxx.ala.emqxsl.com&quot; autocapitalize=&quot;off&quot; autocorrect=&quot;off&quot;&gt;
+      &lt;div class=&quot;row&quot;&gt;
+        &lt;div&gt;&lt;label for=&quot;s-port&quot;&gt;WebSocket TLS port&lt;/label&gt;&lt;input id=&quot;s-port&quot; value=&quot;8084&quot; inputmode=&quot;numeric&quot;&gt;&lt;/div&gt;
+        &lt;div&gt;&lt;label for=&quot;s-me&quot;&gt;My cube is&lt;/label&gt;
+          &lt;select id=&quot;s-me&quot;&gt;&lt;option value=&quot;lumi&quot;&gt;Lumi&lt;/option&gt;&lt;option value=&quot;bumi&quot;&gt;Bumi&lt;/option&gt;&lt;/select&gt;&lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;row&quot;&gt;
+        &lt;div&gt;&lt;label for=&quot;s-user&quot;&gt;Username&lt;/label&gt;&lt;input id=&quot;s-user&quot; value=&quot;phone&quot; autocapitalize=&quot;off&quot;&gt;&lt;/div&gt;
+        &lt;div&gt;&lt;label for=&quot;s-pass&quot;&gt;Password&lt;/label&gt;&lt;input id=&quot;s-pass&quot; type=&quot;password&quot;&gt;&lt;/div&gt;
+      &lt;/div&gt;
+      &lt;label for=&quot;s-prefix&quot;&gt;Topic prefix (same as config.py on the cubes)&lt;/label&gt;
+      &lt;input id=&quot;s-prefix&quot; placeholder=&quot;lumibumi/your-random-words&quot; autocapitalize=&quot;off&quot; autocorrect=&quot;off&quot;&gt;
+      &lt;label for=&quot;s-name&quot;&gt;Name shown on their cube (up to 11 letters)&lt;/label&gt;
+      &lt;input id=&quot;s-name&quot; maxlength=&quot;11&quot; placeholder=&quot;Auntie&quot;&gt;
+      &lt;div class=&quot;row&quot; style=&quot;margin-top:12px&quot;&gt;
+        &lt;button class=&quot;btn primary&quot; id=&quot;s-save&quot; style=&quot;font-size:16px&quot;&gt;Save &amp;amp; connect&lt;/button&gt;
+        &lt;button class=&quot;btn&quot; id=&quot;s-link&quot;&gt;Copy setup link&lt;/button&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;hint&quot;&gt;Settings stay on this device only. The setup link contains your password &amp;mdash;
+        send it only to people you trust (it lets them message the cubes).&lt;/div&gt;
+    &lt;/details&gt;
+  &lt;/section&gt;
+&lt;/main&gt;
+&lt;div id=&quot;toast&quot;&gt;&lt;/div&gt;
+
+&lt;script src=&quot;https://cdn.jsdelivr.net/npm/mqtt@5/dist/mqtt.min.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+&quot;use strict&quot;;
+const W = 128, H = 64;
+const $ = id =&gt; document.getElementById(id);
+const px = new Uint8Array(W * H);            // the 128x64 picture, 1 = lit pixel
+let mode = &quot;text&quot;;
+let quickPick = &quot;hi&quot;;
+
+/* ------------------------------------------------------------ settings --- */
+const KEY = &quot;lumibumi.settings.v1&quot;;
+function loadSettings() {
+  try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; }
+}
+function readForm() {
+  return {
+    host: $(&quot;s-host&quot;).value.trim().replace(/^[a-z]+:\/\//i, &quot;&quot;).replace(/\/.*$/, &quot;&quot;),
+    port: $(&quot;s-port&quot;).value.trim() || &quot;8084&quot;,
+    me: $(&quot;s-me&quot;).value, user: $(&quot;s-user&quot;).value.trim(), pass: $(&quot;s-pass&quot;).value,
+    prefix: $(&quot;s-prefix&quot;).value.trim().replace(/\/+$/, &quot;&quot;), name: $(&quot;s-name&quot;).value.trim()
+  };
+}
+function fillForm(s) {
+  if (s.host) $(&quot;s-host&quot;).value = s.host;
+  if (s.port) $(&quot;s-port&quot;).value = s.port;
+  if (s.me) $(&quot;s-me&quot;).value = s.me;
+  if (s.user) $(&quot;s-user&quot;).value = s.user;
+  if (s.pass) $(&quot;s-pass&quot;).value = s.pass;
+  if (s.prefix) $(&quot;s-prefix&quot;).value = s.prefix;
+  if (s.name) $(&quot;s-name&quot;).value = s.name;
+  $(&quot;target&quot;).value = ($(&quot;s-me&quot;).value === &quot;lumi&quot;) ? &quot;bumi&quot; : &quot;lumi&quot;;
+}
+// A setup link looks like  https://.../index.html#cfg=BASE64
+(function importFromHash() {
+  const m = location.hash.match(/cfg=([^&amp;]+)/);
+  if (!m) return;
+  try {
+    const s = JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1])))));
+    localStorage.setItem(KEY, JSON.stringify(s));
+    history.replaceState(null, &quot;&quot;, location.pathname + location.search);
+    setTimeout(() =&gt; toast(&quot;Settings imported ✓&quot;), 400);
+  } catch (e) { console.warn(&quot;bad setup link&quot;, e); }
+})();
+
+/* ------------------------------------------------------------- helpers --- */
+let toastTimer;
+function toast(t) {
+  const el = $(&quot;toast&quot;); el.textContent = t; el.classList.add(&quot;show&quot;);
+  clearTimeout(toastTimer); toastTimer = setTimeout(() =&gt; el.classList.remove(&quot;show&quot;), 2200);
+}
+function cleanText(s) {
+  return s.replace(/[‘’]/g, &quot;&#x27;&quot;).replace(/[“”]/g, &#x27;&quot;&#x27;).replace(/[–—]/g, &quot;-&quot;)
+          .replace(/[^\x20-\x7E\n]/g, &quot;?&quot;);
+}
+// Same word-wrap as the cube firmware (16 characters per line).
+function wrap(text, width = 16) {
+  const lines = [];
+  for (const para of text.split(&quot;\n&quot;)) {
+    let line = &quot;&quot;;
+    for (let word of para.split(&quot; &quot;)) {
+      while (word.length &gt; width) {
+        if (line) { lines.push(line); line = &quot;&quot;; }
+        lines.push(word.slice(0, width)); word = word.slice(width);
+      }
+      if (!line) line = word;
+      else if (line.length + 1 + word.length &lt;= width) line += &quot; &quot; + word;
+      else { lines.push(line); line = word; }
+    }
+    lines.push(line);
+  }
+  return lines;
+}
+function pack() {            // 128x64 pixels -&gt; 1024 bytes in the OLED&#x27;s own layout
+  const out = new Uint8Array(1024);
+  for (let p = 0; p &lt; 8; p++) for (let x = 0; x &lt; W; x++) {
+    let b = 0;
+    for (let i = 0; i &lt; 8; i++) if (px[(p * 8 + i) * W + x]) b |= 1 &lt;&lt; i;
+    out[p * W + x] = b;
+  }
+  return out;
+}
+function unpack(u8, into) {
+  for (let p = 0; p &lt; 8; p++) for (let x = 0; x &lt; W; x++) {
+    const b = u8[p * W + x];
+    for (let i = 0; i &lt; 8; i++) into[(p * 8 + i) * W + x] = (b &gt;&gt; i) &amp; 1;
+  }
+}
+const b64 = u8 =&gt; { let s = &quot;&quot;; for (const v of u8) s += String.fromCharCode(v); return btoa(s); };
+const unb64 = s =&gt; Uint8Array.from(atob(s), c =&gt; c.charCodeAt(0));
+
+function paint(canvas, pixels) {
+  const g = canvas.getContext(&quot;2d&quot;);
+  const img = g.createImageData(W, H);
+  for (let i = 0; i &lt; W * H; i++) {
+    const on = pixels[i];
+    img.data[i * 4] = on ? 159 : 0; img.data[i * 4 + 1] = on ? 212 : 0;
+    img.data[i * 4 + 2] = on ? 255 : 0; img.data[i * 4 + 3] = 255;
+  }
+  g.putImageData(img, 0, 0);
+}
+const screen = $(&quot;screen&quot;);
+const redraw = () =&gt; paint(screen, px);
+
+/* --------------------------------------------------------------- icons --- */
+const ICONS = {
+  hi:    { label: &quot;Hi!&quot;,         rows: [0x3C,0x42,0xA5,0x81,0xA5,0x99,0x42,0x3C] },
+  love:  { label: &quot;Love you!&quot;,   rows: [0x66,0xFF,0xFF,0xFF,0x7E,0x3C,0x18,0x00] },
+  miss:  { label: &quot;Miss you!&quot;,   rows: [0x18,0x18,0xFF,0x7E,0x3C,0x7E,0x66,0x00] },
+  night: { label: &quot;Good night!&quot;, rows: [0x38,0x70,0xE0,0xE0,0xE0,0x70,0x38,0x00] }
+};
+function iconCanvas(rows, size) {
+  const c = document.createElement(&quot;canvas&quot;); c.width = c.height = 8;
+  const g = c.getContext(&quot;2d&quot;); g.fillStyle = &quot;#000&quot;; g.fillRect(0, 0, 8, 8); g.fillStyle = &quot;#9fd4ff&quot;;
+  rows.forEach((row, r) =&gt; { for (let x = 0; x &lt; 8; x++) if (row &amp; (0x80 &gt;&gt; x)) g.fillRect(x, r, 1, 1); });
+  if (size) { c.style.width = c.style.height = size + &quot;px&quot;; }
+  return c;
+}
+function buildQuick() {
+  const grid = $(&quot;quickgrid&quot;);
+  for (const [id, ic] of Object.entries(ICONS)) {
+    const b = document.createElement(&quot;button&quot;);
+    b.className = &quot;btn&quot; + (id === quickPick ? &quot; sel&quot; : &quot;&quot;); b.dataset.id = id;
+    b.appendChild(iconCanvas(ic.rows)); b.append(ic.label);
+    b.onclick = () =&gt; {
+      quickPick = id;
+      grid.querySelectorAll(&quot;button&quot;).forEach(x =&gt; x.classList.toggle(&quot;sel&quot;, x === b));
+      updatePreview();
+    };
+    grid.appendChild(b);
+  }
+}
+
+/* ------------------------------------------------------------- preview --- */
+function name() { return ($(&quot;s-name&quot;).value.trim() || ($(&quot;s-me&quot;).value === &quot;lumi&quot; ? &quot;Lumi&quot; : &quot;Bumi&quot;)).slice(0, 11); }
+function setPreviewKind(kind) {      // &quot;canvas&quot; or &quot;text&quot;
+  screen.style.display = kind === &quot;canvas&quot; ? &quot;block&quot; : &quot;none&quot;;
+  $(&quot;textprev&quot;).style.display = kind === &quot;text&quot; ? &quot;block&quot; : &quot;none&quot;;
+}
+function updatePreview() {
+  if (mode === &quot;text&quot;) {
+    setPreviewKind(&quot;text&quot;);
+    const text = cleanText($(&quot;msg&quot;).value);
+    $(&quot;count&quot;).textContent = $(&quot;msg&quot;).value.length;
+    const lines = wrap(text), pages = Math.max(1, Math.ceil(lines.length / 5));
+    $(&quot;pages&quot;).textContent = pages &gt; 1 ? pages + &quot; screens (auto-flips)&quot; : &quot;1 screen&quot;;
+    const body = lines.slice(0, 5).map(l =&gt; l.padEnd(16)).join(&quot;\n&quot;);
+    $(&quot;textprev&quot;).textContent = (&quot;From &quot; + name()).padEnd(16) + &quot;\n&quot; + &quot;─&quot;.repeat(16) + &quot;\n&quot; + body;
+    $(&quot;previewHint&quot;).textContent = &quot;Preview of the first screen (the real font is slightly different).&quot;;
+  } else if (mode === &quot;quick&quot;) {
+    setPreviewKind(&quot;canvas&quot;);
+    px.fill(0);
+    const rows = ICONS[quickPick].rows, ox = 48, oy = 2, s = 4;
+    rows.forEach((row, r) =&gt; { for (let x = 0; x &lt; 8; x++) if (row &amp; (0x80 &gt;&gt; x))
+      for (let dy = 0; dy &lt; s; dy++) for (let dx = 0; dx &lt; s; dx++) px[(oy + r * s + dy) * W + ox + x * s + dx] = 1; });
+    redraw();
+    $(&quot;previewHint&quot;).textContent = &quot;The cube draws this picture itself, so it looks sharper than this preview.&quot;;
+  } else {
+    setPreviewKind(&quot;canvas&quot;); redraw();
+    $(&quot;previewHint&quot;).textContent = mode === &quot;draw&quot; ? &quot;Draw right here with your finger or mouse.&quot;
+                                                    : &quot;Pick a photo and adjust it until it looks good.&quot;;
+  }
+}
+
+/* ---------------------------------------------------------------- tabs --- */
+document.querySelectorAll(&quot;.tab&quot;).forEach(t =&gt; t.onclick = () =&gt; {
+  mode = t.dataset.m;
+  document.querySelectorAll(&quot;.tab&quot;).forEach(x =&gt; x.classList.toggle(&quot;active&quot;, x === t));
+  document.querySelectorAll(&quot;.pane&quot;).forEach(p =&gt; p.classList.toggle(&quot;active&quot;, p.id === &quot;p-&quot; + mode));
+  if (mode === &quot;photo&quot;) renderPhoto();
+  updatePreview();
+});
+$(&quot;msg&quot;).addEventListener(&quot;input&quot;, updatePreview);
+$(&quot;s-name&quot;).addEventListener(&quot;input&quot;, updatePreview);
+
+/* ---------------------------------------------------------------- draw --- */
+let tool = &quot;pen&quot;, drawing = false, last = null;
+function setTool(t) { tool = t; $(&quot;t-pen&quot;).classList.toggle(&quot;sel&quot;, t === &quot;pen&quot;); $(&quot;t-erase&quot;).classList.toggle(&quot;sel&quot;, t === &quot;erase&quot;); }
+$(&quot;t-pen&quot;).onclick = () =&gt; setTool(&quot;pen&quot;);
+$(&quot;t-erase&quot;).onclick = () =&gt; setTool(&quot;erase&quot;);
+$(&quot;t-clear&quot;).onclick = () =&gt; { px.fill(0); redraw(); };
+$(&quot;t-invert&quot;).onclick = () =&gt; { for (let i = 0; i &lt; px.length; i++) px[i] ^= 1; redraw(); };
+function pos(e) {
+  const r = screen.getBoundingClientRect();
+  return [Math.floor((e.clientX - r.left) / r.width * W), Math.floor((e.clientY - r.top) / r.height * H)];
+}
+function dab(x, y) {
+  const s = +$(&quot;brush&quot;).value, v = tool === &quot;pen&quot; ? 1 : 0, o = Math.floor(s / 2);
+  for (let j = 0; j &lt; s; j++) for (let i = 0; i &lt; s; i++) {
+    const xx = x - o + i, yy = y - o + j;
+    if (xx &gt;= 0 &amp;&amp; xx &lt; W &amp;&amp; yy &gt;= 0 &amp;&amp; yy &lt; H) px[yy * W + xx] = v;
+  }
+}
+function line(x0, y0, x1, y1) {       // Bresenham
+  const dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0), sx = x0 &lt; x1 ? 1 : -1, sy = y0 &lt; y1 ? 1 : -1;
+  let err = dx + dy;
+  for (;;) {
+    dab(x0, y0);
+    if (x0 === x1 &amp;&amp; y0 === y1) break;
+    const e2 = 2 * err;
+    if (e2 &gt;= dy) { err += dy; x0 += sx; }
+    if (e2 &lt;= dx) { err += dx; y0 += sy; }
+  }
+}
+screen.addEventListener(&quot;pointerdown&quot;, e =&gt; {
+  if (mode !== &quot;draw&quot;) return;
+  drawing = true; screen.setPointerCapture(e.pointerId);
+  last = pos(e); dab(last[0], last[1]); redraw();
+});
+screen.addEventListener(&quot;pointermove&quot;, e =&gt; {
+  if (!drawing || mode !== &quot;draw&quot;) return;
+  const p = pos(e); line(last[0], last[1], p[0], p[1]); last = p; redraw();
+});
+[&quot;pointerup&quot;, &quot;pointercancel&quot;].forEach(ev =&gt; screen.addEventListener(ev, () =&gt; { drawing = false; }));
+
+/* --------------------------------------------------------------- photo --- */
+let photo = null;
+$(&quot;file&quot;).onchange = e =&gt; {
+  const f = e.target.files[0]; if (!f) return;
+  const img = new Image();
+  img.onload = () =&gt; { photo = img; renderPhoto(); updatePreview(); };
+  img.onerror = () =&gt; toast(&quot;Couldn&#x27;t open that picture&quot;);
+  img.src = URL.createObjectURL(f);
+};
+[&quot;fit&quot;, &quot;dither&quot;, &quot;bright&quot;, &quot;contrast&quot;, &quot;pinv&quot;].forEach(id =&gt; $(id).addEventListener(&quot;input&quot;, () =&gt; { renderPhoto(); updatePreview(); }));
+function renderPhoto() {
+  if (!photo) return;
+  const c = document.createElement(&quot;canvas&quot;); c.width = W; c.height = H;
+  const g = c.getContext(&quot;2d&quot;, { willReadFrequently: true });
+  g.fillStyle = &quot;#000&quot;; g.fillRect(0, 0, W, H);
+  const iw = photo.naturalWidth, ih = photo.naturalHeight, fit = $(&quot;fit&quot;).value;
+  if (fit === &quot;stretch&quot;) g.drawImage(photo, 0, 0, W, H);
+  else {
+    const s = fit === &quot;cover&quot; ? Math.max(W / iw, H / ih) : Math.min(W / iw, H / ih);
+    const dw = iw * s, dh = ih * s;
+    g.drawImage(photo, (W - dw) / 2, (H - dh) / 2, dw, dh);
+  }
+  const d = g.getImageData(0, 0, W, H).data;
+  const gray = new Float32Array(W * H);
+  const con = +$(&quot;contrast&quot;).value / 100, bri = +$(&quot;bright&quot;).value;
+  for (let i = 0; i &lt; W * H; i++) {
+    const v = 0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2];
+    gray[i] = Math.max(0, Math.min(255, (v - 128) * con + 128 + bri));
+  }
+  const inv = $(&quot;pinv&quot;).checked;
+  if ($(&quot;dither&quot;).value === &quot;fs&quot;) {            // Floyd-Steinberg
+    for (let y = 0; y &lt; H; y++) for (let x = 0; x &lt; W; x++) {
+      const i = y * W + x, old = gray[i], nv = old &lt; 128 ? 0 : 255, err = old - nv;
+      gray[i] = nv;
+      if (x + 1 &lt; W) gray[i + 1] += err * 7 / 16;
+      if (y + 1 &lt; H) {
+        if (x &gt; 0) gray[i + W - 1] += err * 3 / 16;
+        gray[i + W] += err * 5 / 16;
+        if (x + 1 &lt; W) gray[i + W + 1] += err * 1 / 16;
+      }
+    }
+  }
+  for (let i = 0; i &lt; W * H; i++) px[i] = ((gray[i] &gt;= 128) ? 1 : 0) ^ (inv ? 1 : 0);
+}
+
+/* ---------------------------------------------------------------- MQTT --- */
+let client = null;
+const online = { lumi: false, bumi: false };
+function setConn(t, bad) { $(&quot;conn&quot;).textContent = t ? &quot;· &quot; + t : &quot;&quot;; $(&quot;conn&quot;).style.color = bad ? &quot;var(--bad)&quot; : &quot;var(--mute)&quot;; }
+function showDots() { for (const k of [&quot;lumi&quot;, &quot;bumi&quot;]) $(&quot;d-&quot; + k).classList.toggle(&quot;on&quot;, online[k]); }
+
+function connect() {
+  const s = loadSettings();
+  if (!s.host || !s.user || !s.pass || !s.prefix) { setConn(&quot;not set up yet&quot;, true); $(&quot;settings&quot;).open = true; return; }
+  if (client) { client.end(true); client = null; }
+  online.lumi = online.bumi = false; showDots();
+  setConn(&quot;connecting…&quot;);
+  client = mqtt.connect(&quot;wss://&quot; + s.host + &quot;:&quot; + s.port + &quot;/mqtt&quot;, {
+    username: s.user, password: s.pass, clean: true, reconnectPeriod: 4000, connectTimeout: 10000,
+    clientId: &quot;lumibumi-web-&quot; + Math.random().toString(16).slice(2, 8)
+  });
+  client.on(&quot;connect&quot;, () =&gt; {
+    setConn(&quot;connected ✓&quot;);
+    client.subscribe(s.prefix + &quot;/status/+&quot;);
+    client.subscribe(s.prefix + &quot;/to/&quot; + s.me, { qos: 1 });
+  });
+  client.on(&quot;reconnect&quot;, () =&gt; setConn(&quot;reconnecting…&quot;));
+  client.on(&quot;offline&quot;, () =&gt; setConn(&quot;offline&quot;, true));
+  client.on(&quot;error&quot;, err =&gt; setConn(&quot;error: &quot; + (err &amp;&amp; err.message || err), true));
+  client.on(&quot;message&quot;, (topic, payload) =&gt; {
+    const tail = topic.split(&quot;/&quot;).slice(-1)[0], kind = topic.split(&quot;/&quot;).slice(-2)[0];
+    const text = payload.toString();
+    if (kind === &quot;status&quot;) { online[tail] = text === &quot;online&quot;; showDots(); return; }
+    try { showIncoming(JSON.parse(text)); } catch (e) { console.warn(&quot;bad message&quot;, text); }
+  });
+}
+
+/* ----------------------------------------------------------------- log --- */
+function addLog(who, content) {
+  const ul = $(&quot;log&quot;); if (ul.firstElementChild &amp;&amp; !ul.firstElementChild.dataset.k) ul.innerHTML = &quot;&quot;;
+  const li = document.createElement(&quot;li&quot;); li.dataset.k = 1;
+  const t = new Date().toLocaleTimeString([], { hour: &quot;2-digit&quot;, minute: &quot;2-digit&quot; });
+  li.innerHTML = &#x27;&lt;span class=&quot;who&quot;&gt;&lt;/span&gt; &lt;span class=&quot;t&quot; style=&quot;color:var(--mute)&quot;&gt;&lt;/span&gt;&lt;div class=&quot;c&quot;&gt;&lt;/div&gt;&#x27;;
+  li.querySelector(&quot;.who&quot;).textContent = who; li.querySelector(&quot;.t&quot;).textContent = t;
+  const c = li.querySelector(&quot;.c&quot;);
+  if (typeof content === &quot;string&quot;) c.textContent = content; else c.appendChild(content);
+  ul.prepend(li);
+}
+function showIncoming(m) {
+  const from = m.from || &quot;Someone&quot;;
+  if (m.type === &quot;text&quot;) { addLog(from + &quot; →&quot;, m.text || &quot;&quot;); beep(); }
+  else if (m.type === &quot;preset&quot; &amp;&amp; ICONS[m.id]) { addLog(from + &quot; →&quot;, ICONS[m.id].label); beep(); }
+  else if (m.type === &quot;img&quot;) {
+    const tmp = new Uint8Array(W * H); unpack(unb64(m.data), tmp);
+    const c = document.createElement(&quot;canvas&quot;); c.width = W; c.height = H; paint(c, tmp);
+    addLog(from + &quot; drew →&quot;, c); beep();
+  }
+}
+function beep() {
+  try {
+    const a = new (window.AudioContext || window.webkitAudioContext)(), o = a.createOscillator(), g = a.createGain();
+    o.frequency.value = 880; g.gain.value = 0.05; o.connect(g); g.connect(a.destination); o.start(); o.stop(a.currentTime + 0.12);
+  } catch (e) { /* audio not allowed yet */ }
+}
+
+/* ---------------------------------------------------------------- send --- */
+function send() {
+  const s = loadSettings();
+  if (!client || !client.connected) { toast(&quot;Not connected yet — check Settings&quot;); return; }
+  const from = name(), to = $(&quot;target&quot;).value;
+  let msg, summary;
+  if (mode === &quot;text&quot;) {
+    const text = cleanText($(&quot;msg&quot;).value).trim();
+    if (!text) { toast(&quot;Type a message first&quot;); return; }
+    msg = { type: &quot;text&quot;, from, text }; summary = text;
+  } else if (mode === &quot;quick&quot;) {
+    msg = { type: &quot;preset&quot;, from, id: quickPick }; summary = ICONS[quickPick].label;
+  } else {
+    if (!px.some(v =&gt; v)) { toast(&quot;The picture is empty&quot;); return; }
+    msg = { type: &quot;img&quot;, from, data: b64(pack()) };
+    const c = document.createElement(&quot;canvas&quot;); c.width = W; c.height = H; paint(c, px); summary = c;
+  }
+  client.publish(s.prefix + &quot;/to/&quot; + to, JSON.stringify(msg), { qos: 1 }, err =&gt; {
+    if (err) { toast(&quot;Couldn&#x27;t send: &quot; + err.message); return; }
+    toast(&quot;Sent to &quot; + (to === &quot;lumi&quot; ? &quot;Lumi&quot; : &quot;Bumi&quot;) + &quot; ✓&quot;);
+    addLog(&quot;You → &quot; + to, summary);
+    if (mode === &quot;text&quot;) $(&quot;msg&quot;).value = &quot;&quot;;
+    updatePreview();
+  });
+}
+$(&quot;send&quot;).onclick = send;
+
+/* ------------------------------------------------------------ settings UI --- */
+$(&quot;s-save&quot;).onclick = () =&gt; {
+  const s = readForm();
+  if (!s.host || !s.user || !s.pass || !s.prefix) { toast(&quot;Please fill in address, username, password and prefix&quot;); return; }
+  localStorage.setItem(KEY, JSON.stringify(s));
+  $(&quot;target&quot;).value = s.me === &quot;lumi&quot; ? &quot;bumi&quot; : &quot;lumi&quot;;
+  connect(); updatePreview(); $(&quot;settings&quot;).open = false;
+};
+$(&quot;s-link&quot;).onclick = async () =&gt; {
+  const s = readForm();
+  const link = location.origin + location.pathname + &quot;#cfg=&quot; + encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(s)))));
+  try { await navigator.clipboard.writeText(link); toast(&quot;Setup link copied&quot;); }
+  catch (e) { prompt(&quot;Copy this link:&quot;, link); }
+};
+
+/* ---------------------------------------------------------------- start --- */
+fillForm(loadSettings());
+buildQuick();
+updatePreview();
+connect();
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre></div></details></section>
+</div>
+<footer>Lumi Bumi · made with love for a very lucky niece</footer>
+<script>
+document.querySelectorAll(".copy").forEach(b=>b.addEventListener("click",async()=>{
+  const t=b.parentElement.querySelector("code").innerText;
+  try{await navigator.clipboard.writeText(t);b.textContent="Copied ✓"}catch(e){b.textContent="Select + ⌘C"}
+  setTimeout(()=>b.textContent="Copy",1600)}));
+const boxes=[...document.querySelectorAll('input[type=checkbox][data-id]')];
+const KEY="lumibumi.guide.v1";let saved={};try{saved=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){}
+function upd(){const d=boxes.filter(b=>b.checked).length;
+  document.getElementById("pbar").style.width=(100*d/boxes.length)+"%";
+  document.getElementById("ptxt").textContent=d+" of "+boxes.length+" tests passed"}
+boxes.forEach(b=>{b.checked=!!saved[b.dataset.id];b.addEventListener("change",()=>{saved[b.dataset.id]=b.checked;
+  try{localStorage.setItem(KEY,JSON.stringify(saved))}catch(e){}upd()})});
+document.getElementById("reset").onclick=()=>{if(confirm("Clear all ticks?")){saved={};try{localStorage.removeItem(KEY)}catch(e){}boxes.forEach(b=>b.checked=false);upd()}};
+upd();
+</script></body></html>

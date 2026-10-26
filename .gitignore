@@ -1,0 +1,4 @@
+firmware/config.py
+firmware/config_bumi.py
+__pycache__/
+*.pyc

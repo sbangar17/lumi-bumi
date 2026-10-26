@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lumi Bumi – Setting up Bumi at your niece's home</title>
+<style>
+  :root{--ink:#1b2340;--mute:#5d6685;--line:#dfe4f2;--bg:#f6f8fe;--card:#fff;--blue:#4a7bff;--pink:#e0679f;--ok:#2a9d6a;--warn:#c77a00}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:820px;margin:0 auto;padding:28px 18px 60px}
+  header h1{margin:0 0 4px;font-size:30px}
+  header h1 span{color:var(--pink)}
+  header p{margin:0;color:var(--mute)}
+  h2{margin:34px 0 10px;font-size:22px;display:flex;align-items:center;gap:10px}
+  h2 .n{background:var(--blue);color:#fff;border-radius:50%;width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;font-size:16px;flex:none}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:12px 0}
+  .card h3{margin:0 0 8px;font-size:17px}
+  ul.check{list-style:none;margin:0;padding:0}
+  ul.check li{display:flex;gap:10px;padding:7px 0;border-top:1px solid var(--line)}
+  ul.check li:first-child{border-top:0}
+  ul.check input{margin-top:5px;width:18px;height:18px;flex:none}
+  .who{display:inline-block;font-size:12px;font-weight:700;border-radius:999px;padding:2px 10px;margin-left:6px;vertical-align:middle}
+  .me{background:#e5ecff;color:#2f56c9}
+  .her{background:#fde6f0;color:#b2336f}
+  .note{border-left:4px solid var(--warn);background:#fff7e8;padding:10px 14px;border-radius:8px;margin:12px 0}
+  .tip{border-left:4px solid var(--ok);background:#eaf8f1;padding:10px 14px;border-radius:8px;margin:12px 0}
+  code{background:#eef1fa;border-radius:5px;padding:1px 6px;font-size:.92em}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  th,td{text-align:left;padding:8px 10px;border-top:1px solid var(--line);vertical-align:top}
+  th{color:var(--mute);font-weight:600;border-top:0}
+  .steps{counter-reset:s;list-style:none;padding:0;margin:0}
+  .steps li{counter-increment:s;position:relative;padding:8px 0 8px 40px}
+  .steps li::before{content:counter(s);position:absolute;left:0;top:8px;width:28px;height:28px;border-radius:50%;background:#e5ecff;color:#2f56c9;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px}
+  .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;margin:14px 0;font-size:14px}
+  .flow div{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 12px;text-align:center}
+  .flow .a{color:var(--mute)}
+  .flow .broker{background:#eef3ff;border-color:#bcd0ff}
+  footer{margin-top:40px;color:var(--mute);font-size:14px}
+  @media print{body{background:#fff}.card{break-inside:avoid}.wrap{padding:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Lumi <span>♥</span> Bumi</h1>
+  <p>Giving Bumi to your niece while Lumi stays with you</p>
+</header>
+
+<div class="card">
+  <h3>How it works</h3>
+  <p style="margin:0 0 6px">Both cubes talk through the internet broker (EMQX), not directly to each other. So Bumi works from any home with Wi-Fi. Only Bumi's Wi-Fi needs changing.</p>
+  <div class="flow">
+    <div>Lumi<br><span class="a">your Wi-Fi</span></div>
+    <span class="a">⇄</span>
+    <div class="broker">EMQX broker<br><span class="a">on the internet</span></div>
+    <span class="a">⇄</span>
+    <div>Bumi<br><span class="a">her Wi-Fi</span></div>
+  </div>
+  <p style="margin:0">The same broker also connects the phone page, so each family can send text, drawings and photos too.</p>
+</div>
+
+<h2><span class="n">1</span>Before you hand it over <span class="who me">at your place</span></h2>
+
+<div class="card">
+  <ul class="check">
+    <li><input type="checkbox" id="a1"><label for="a1"><b>Update Bumi's program.</b> Plug Bumi into your Mac and upload the new <code>main.py</code> (it adds Hi Mom!, Hi Aunt! and Hi both of you!). Do Lumi too.</label></li>
+    <li><input type="checkbox" id="a2"><label for="a2"><b>Remove your Wi-Fi from Bumi.</b> Bumi's <code>config.py</code> still holds your Wi-Fi name and password. Blank both and re-upload, so your password isn't in the gift and the cube opens its setup hotspot at her home.</label></li>
+    <li><input type="checkbox" id="a3"><label for="a3"><b>Change the EMQX passwords.</b> In the EMQX console, set new passwords for the Lumi and Bumi users (use long, random ones). Then update <code>config.py</code> and <code>config_bumi.py</code> and re-upload, one cube at a time. Lumi won't connect until its new password is on it.</label></li>
+    <li><input type="checkbox" id="a4"><label for="a4"><b>Test the hotspot.</b> Hold <b>both buttons</b> while plugging Bumi in. A Wi-Fi called <code>LumiBumi-Setup</code> should appear. Join it from a phone and open <code>192.168.4.1</code>. If the page loads, it works.</label></li>
+    <li><input type="checkbox" id="a5"><label for="a5"><b>Test a message both ways</b> with the new passwords: a quick message from Lumi to Bumi and back.</label></li>
+    <li><input type="checkbox" id="a6"><label for="a6"><b>Pack it:</b> Bumi, a USB-C cable, and a USB charger (a phone charger is fine).</label></li>
+  </ul>
+</div>
+
+<div class="note"><b>Keep your passwords private.</b> Don't put them in a gift note or in a photo of the setup. Bumi holds only its own EMQX login, never Lumi's.</div>
+
+<h2><span class="n">2</span>At your niece's home <span class="who her">a grown-up, once</span></h2>
+
+<div class="card">
+  <p style="margin-top:0">You'll need her home Wi-Fi name and password, and a phone.</p>
+  <ol class="steps">
+    <li>Plug Bumi into the USB charger with the USB-C cable.</li>
+    <li>Unplug it, then plug it in again <b>while holding both buttons</b>. The screen shows the setup hotspot.</li>
+    <li>On the phone, join Wi-Fi <code>LumiBumi-Setup</code>.</li>
+    <li>Open <code>192.168.4.1</code> in the phone's browser.</li>
+    <li>Pick her home Wi-Fi from the list and enter its password. Save.</li>
+    <li>Bumi restarts and joins. It plays the online chime and shows the idle screen.</li>
+    <li>From your Lumi (or the phone page), send "Hi!". Bumi should chime and show it.</li>
+  </ol>
+  <ul class="check" style="margin-top:10px">
+    <li><input type="checkbox" id="b1"><label for="b1">Bumi shows the idle screen and played its chime</label></li>
+    <li><input type="checkbox" id="b2"><label for="b2">Lumi's message arrived on Bumi</label></li>
+    <li><input type="checkbox" id="b3"><label for="b3">Pressing Bumi's button A (Hi) arrived on Lumi</label></li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>Her Wi-Fi must be</h3>
+  <ul style="margin:0;padding-left:20px">
+    <li><b>2.4 GHz.</b> Most routers broadcast it. If the router has one name for both bands, that's fine.</li>
+    <li><b>A normal password network.</b> Hotel or school Wi-Fi that asks you to sign in on a web page won't work.</li>
+  </ul>
+</div>
+
+<h2><span class="n">3</span>Phone page for her family</h2>
+<div class="card">
+  <ul class="check">
+    <li><input type="checkbox" id="c1"><label for="c1"><b>Create a separate EMQX user</b> for the phone page, such as <code>bumiphone</code>, with its own password. Don't share Lumi's or Bumi's logins. You can delete this user later without touching the cubes.</label></li>
+    <li><input type="checkbox" id="c2"><label for="c2"><b>Make the page reachable from her phone.</b> The file <code>phone/index.html</code> has to be hosted somewhere on the web (a free static host works), or opened from a copy on her phone.</label></li>
+    <li><input type="checkbox" id="c3"><label for="c3"><b>Set it up once:</b> open the page, open Settings, and fill in the broker address, port <code>8084</code>, the phone user, the topic prefix, and a display name. Set <b>"My cube is"</b> to <b>Bumi</b>.</label></li>
+    <li><input type="checkbox" id="c4"><label for="c4"><b>Share with a link:</b> tap <b>Copy setup link</b> and send it to her family privately. The link carries the login, so don't post it publicly.</label></li>
+    <li><input type="checkbox" id="c5"><label for="c5"><b>Test:</b> send a text and a drawing from the phone page, and check they show on Lumi.</label></li>
+  </ul>
+</div>
+
+<h2><span class="n">4</span>If something doesn't work</h2>
+<div class="card">
+  <table>
+    <tr><th>What you see</th><th>Try this</th></tr>
+    <tr><td>No <code>LumiBumi-Setup</code> Wi-Fi appears</td><td>Unplug and plug in again with both buttons held for the whole start-up. Keep the phone close to Bumi.</td></tr>
+    <tr><td>Bumi can't join her Wi-Fi</td><td>Check the password (it is case-sensitive). Check that it is a 2.4 GHz network. Move Bumi closer to the router.</td></tr>
+    <tr><td>Joins Wi-Fi but never says "online"</td><td>Check that the password on Bumi matches the EMQX user. Usernames are case-sensitive: <code>Bumi</code>, not <code>bumi</code>.</td></tr>
+    <tr><td>Messages arrive late</td><td>Bumi may have been unplugged. Queued messages are delivered when it reconnects, within the broker's limits.</td></tr>
+    <tr><td>Screen is dark</td><td>It sleeps after 15 quiet minutes. Press a button or send a message to wake it.</td></tr>
+    <tr><td>No sound</td><td>Hold both buttons for about 1.5 seconds to unmute.</td></tr>
+    <tr><td>Moved house or changed router</td><td>Repeat step 2 to enter the new Wi-Fi.</td></tr>
+  </table>
+</div>
+
+<div class="tip"><b>Button guide for her:</b> A short press = "Hi!", A long press = "Miss you!", B short = "Love you!", B long = "Good night!". Hold both for about 1.5 seconds to mute or unmute.</div>
+
+<footer>
+  Free plan: the EMQX spend limit is $0.00, so nothing is charged. Two cubes use only a small part of the monthly free quota.
+</footer>
+
+</div>
+</body>
+</html>
